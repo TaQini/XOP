@@ -1,0 +1,29 @@
+2 ROP Attack 
+Without injecting new code into the programs address space, ROP attacks consist of short instruction sequences, which are called gadgets. 
+Each gadget performs some small computation, such as adding two registers or loading a value to memory, and ends with return instruction. We can chain gadgets together and transfer the control flow from one gadget to another by writing appropriate values over the stack.
+[newline]
+Figure 1 illustrates a general ROP attack workflow. In step 1, the attacker exploits a memory-related vulnerability of a specific program, e.g., a buffer overflow, and moves the stack pointer (ESP) to the first return address. 
+For example, Aleph in [31] uses stack smashing techniques to overwrite the return address of a function. Return address 1 is injected at the place where the original return address was located, and the value of ESP will be automatically changed to this point. 
+In step 2, execution is redirected to the first gadget by popping return address 1 from the stack. 
+The gadget is terminated by another return instruction which pops return address 2 from the stack (step 3) and redirects execution to the next gadget (step 4). 
+Each gadget is executed one by one in this way until the attacker attains his goal.
+[Fig.1]
+Recently, some new variants of ROP attack without using ret instructions were proposed. 
+Checkoway et al. [15] found it is possible to perform return-oriented programming by looking for a pop instruction followed by an indirect jump (e.g., pop edx ; jmp [edx ]). 
+This instruction sequence behaves like returns, and can be used to chain useful gadgets together.
+[newline]
+Jump-Oriented Programming (JOP) [12] is another variant of ROP attack which uses register-indirect jumps instead of returns. 
+JOP uses a dispatcher table to hold gadget addresses. Each gadget must be followed by a dispatcher, which is an instruction sequence that can govern the control flow. 
+The dispatcher is used as a virtual program counter and translates the control flow to an entry in the dispatch table, which is the address of a particular jump-oriented functional gadget. 
+At the end of a functional gadget, the attacker uses an indirect jump back to the dispatcher. 
+Then, the dispatcher advances the pointer to the next functional gadget. A simple case of dispatcher is add edx, 4; jmp [edx ].
+[newline]
+Call Oriented Programming (COP) [14] was introduced by Nicholas Carlini and David Wagner in 2014. 
+Instead of using gadgets that end in returns, the attacker uses gadgets that end with indirect calls. 
+COP attack does not require a dispatcher gadget and gadgets are chained together by pointing the memory-indirect locations to the next gadget in sequence. 
+[newline-Fig.2]
+To evade current protection mechanisms, attackers prefer to use combina- tional gadgets. 
+Figure 2 shows a very simple mixed ROP attack constructed by only 4 short gadgets. 
+It is derived from a traditional shellcode [3] which exits the running process on x86 architecture. 
+We used exit(n) (n represents a non-zero integer) system call instead of exit(0) for convenience. The system call number is stored in eax and the parameter is stored in ebx. 
+DROP [17] and DynIMA [20] only detect contiguous ret-based gadgets and the attacker can leverage this simple ROP malicious code to evade these two defense mechanisms.

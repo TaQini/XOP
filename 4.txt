@@ -2,7 +2,7 @@
 Based on the features of ROP attack, we propose our approach to efficiently detect ROP attacks. Since we assume no access to source code, we make use of instrumentation technique that allows to add extra code to a program to observe and debug the program's behavior [29].
 
 4.1 Assumptions and Definitions
-In this paper, we define the number of instructions in a gadget as G_size. Candidate gadget refers to the gadget that G_size is greater than the threshold T0. The length of contiguous candidate gadget sequence is defined as S_length, and Max(S length) represents the maximum values of S length.
+In this paper, we define the number of instructions in a gadget as G_size. Candidate gadget refers to the gadget that G_size is greater than the threshold T0. The length of contiguous candidate gadget sequence is defined as S_length, and Max(S_length) represents the maximum values of S_length.
 In order to simulate the real environment, we make the following assumptions:
 1. We assume that the underlying system supports DEP [1] model that prohibits writing to executable memory. In this case, code injection based attacks are impossible. Modern processors and operating systems already enable DEP by default.
 2. We assume that the attacker is able to perform a buffer overflow [19,31,39], a string formatting attack or a non-local jump buffer (using setjmp and longjmp [4]) to mount a ROP attack. 

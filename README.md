@@ -1,3 +1,11 @@
+# Virtual Machine
+	- 32-bit Ubuntu
+	- username: xop
+	- pwd: xop@TaQini
+	- kernel: 4.4.0-31-generic
+    - arch: i686
+	- relaese: 14.04.5
+
 # question
 Ropper 是否是有限制地搜索gadget，例如只搜索长度小于6的gadget
  -> 漏掉 size>6, 且含有padding的可用gadget

@@ -1,0 +1,40 @@
+References
+1. Data execution prevention. http://support.microsoft.com/kb/875352/EN-US
+2. Linux/x86 - /bin/sh sysenter Opcode Array Payload. http://shell-storm.org/ shellcode/files/shellcode-236.php
+3. Linux/x86 - sys exit(0). http://shell-storm.org/shellcode/files/shellcode-623.php 
+4. Setjmp - set jump point for a non-local goto. http://pubs.opengroup.org/onlinepubs/009695399/functions/setjmp.html
+5. Shellcodes database for study cases. http://shell-storm.org/shellcode/
+6. HT Editor 2.0.20 Buffer Overflow (ROP PoC). http://www.exploit-db.com/exploits/22683/
+7. PHP 5.3.6 Buffer Overflow PoC. http://www.exploit-db.com/exploits/17486
+8. ROPgadget - Gadgets finder and auto-roper. http://shell-storm.org/project/ROPgadget/
+9. ROPPER - ROP GADGET FINDER AND BINARY INFORMATION TOOL.https://scoding.de/ropper/
+10. Standard Performance Evaluation Corporation, SPEC CPU2006 Benchmarks. http://www.spec.org/osg/cpu2006/
+11. Bletsch, T., Jiang, X., Freeh, V.: Mitigating code-reuse attacks with control-flow locking. In: Proceedings of the 27th Annual Computer Security Applications Conference, pp. 353-362. ACM (2011)
+12. Bletsch, T., Jiang, X., Freeh, V.W., Liang, Z.: Jump-oriented programming: a new class of code-reuse attack. In: Proceedings of the 6th ACM Symposium on Information, Computer and Communications Security, pp. 30-40. ACM (2011)
+13. Buchanan, E., Roemer, R., Shacham, H., Savage, S.: When good instructions go bad: generalizing return-oriented programming to risc. In: Proceedings of the 15th ACM Conference on Computer and Communications Security, pp. 27-38. ACM (2008)
+14. Carlini, N., Wagner, D.: ROP is still dangerous: breaking modern defenses. In: 23rd USENIX Security Symposium (USENIX Security 2014), pp. 385-399 (2014)
+15. Checkoway, S., Davi, L., Dmitrienko, A., Sadeghi, A.R., Shacham, H., Winandy, M.: Return-oriented programming without returns. In: Proceedings of the 17th ACM Conference on Computer and Communications Security, pp. 559-572. ACM (2010)
+16. Checkoway, S., Feldman, A.J., Kantor, B., Halderman, J.A., Felten, E.W., Shacham, H.: Can DREs provide long-lasting security? The case of return-oriented programming and the AVC advantage. In: EVT/WOTE 2009 (2009)
+17. Chen, P., Xiao, H., Shen, X., Yin, X., Mao, B., Xie, L.: DROP: detecting returnoriented programming malicious code. In: Prakash, A., Sen Gupta, I. (eds.) ICISS 2009. LNCS, vol. 5905, pp. 163-177. Springer, Heidelberg (2009). doi:10.1007/978-3-642-10772-6 13
+18. Chen, P., Xing, X., Han, H., Mao, B., Xie, L.: Efficient detection of the returnoriented programming malicious code. In: Jha, S., Mathuria, A. (eds.) ICISS 2010. LNCS, vol. 6503, pp. 140-155. Springer, Heidelberg (2010). doi:10.1007/978-3-642-17714-9 11
+19. Chen, S., Li, Z., Huang, Y., Xing, J.: Sat-based technique to detect buffer overflows in c source codes. J. Tsinghua Univ. (Science and Technology), S2 (2009)
+20. Davi, L., Sadeghi, A.R., Winandy, M.: Dynamic integrity measurement and attestation: towards defense against return-oriented programming attacks. In: Proceedings of the 2009 ACM Workshop on Scalable Trusted Computing, pp. 49-54. ACM (2009)
+21. Davi, L., Sadeghi, A.R., Winandy, M.: Ropdefender: adetection tool to defend against return-oriented programming attacks. In: Proceedings of the 6th ACM Symposium on Information, Computer and Communications Security, pp. 40-51. ACM (2011)
+22. Dullien, T., Kornau, T., Weinmann, R.P.: A framework for automated architecture-independent gadget search. In: WOOT (2010)
+23. Francillon, A., Castelluccia, C.: Code injection attacks on Harvard-architecture devices. In: Proceedings of the 15th ACM Conference on Computer and Communications Security, pp. 15-26. ACM (2008)
+24. Hund, R., Holz, T., Freiling, F.C.: Return-oriented rootkits: bypassing kernel code integrity protection mechanisms. In: USENIX Security Symposium, pp. 383-398 (2009)
+25. Kayaalp, M., Schmitt, T., Nomani, J., Ponomarev, D., Abu-Ghazaleh, N.: SCRAP: architecture for signature-based protection from code reuse attacks. In: 2013 IEEE 19th International Symposium on High Performance Computer Architecture (HPCA2013), pp. 258-269. IEEE (2013) 
+26. Kornau, T.: Return oriented programming for the ARM architecture. Ph.D. thesis, Masters thesis, Ruhr-Universität Bochum (2010) 
+27. Li, J., Wang, Z., Jiang, X., Grace, M., Bahram, S.: Defeating return-oriented rootkits with return-less kernels. In: Proceedings of the 5th European Conference on Computer Systems, pp. 195-208. ACM (2010) 
+28. Luk, C.K., Cohn, R., Muth, R., Patil, H., Klauser, A., Lowney, G., Wallace, S., Reddi, V.J., Hazelwood, K.: Pin: building customized program analysis tools with dynamic instrumentation. In: ACM Sigplan Notices, vol. 40, pp. 190-200. ACM (2005) 
+29. Nethercote, N.: Dynamic binary analysis and instrumentation (2004). http://valgrind.org/docs/phd2004.pdf 
+30. Onarlioglu, K., Bilge, L., Lanzi, A., Balzarotti, D., Kirda, E.: G-free: defeating return-oriented programming through gadget-less binaries. In: Proceedings of the 26th Annual Computer Security Applications Conference, pp. 49-58. ACM (2010) 
+31. One, A.: Smashing the stack for fun and profit. Phrack Mag. 7(49), 14-16 (1996) 
+32. Pappas, V., Polychronakis, M., Keromytis, A.D.: Transparent ROP exploit mitigation using indirect branch tracing. In: Presented as Part of the 22nd USENIX Security Symposium (USENIX Security 2013), pp. 447-462 (2013) 
+33. Roemer, R.G.: Finding the bad in good code: automated return-oriented programming exploit discovery (2009) 
+34. Schwartz, E.J., Avgerinos, T., Brumley, D.: Q: Exploit hardening made easy. In: USENIX Security Symposium, pp. 25-41 (2011) 
+35. Shacham, H.: The geometry of innocent flesh on the bone: return-into-libc without function calls (on the x86). In: Proceedings of the 14th ACM Conference on Computer and Communications Security, pp. 552-561. ACM (2007) 
+36. Tran, M., Etheridge, M., Bletsch, T., Jiang, X., Freeh, V., Ning, P.: On the expressiveness of return-into-libc attacks. In: Sommer, R., Balzarotti, D., Maier, G. (eds.) RAID 2011. LNCS, vol. 6961, pp. 121-141. Springer, Heidelberg (2011). doi:10.1007/978-3-642-23644-0 7 
+37. Wojtczuk, R.: The advanced return-into-lib(c) exploits: PaX case study. Phrack Mag. 0x0b(0x3a), Phile# 0x04 of 0x0e (2001)
+38. Yao, F., Chen, J., Venkataramani, G.: Jop-alarm: detecting jump-oriented programming-based anomalies in applications. In: 2013 IEEE 31st International Conference on Computer Design (ICCD), pp. 467-470. IEEE (2013) 
+39. Zhang, M., Luo, J.: Pointer analysis algorithm in static buffer overflow analysis. Comput. Eng. 31(18), 41-43 (2005)

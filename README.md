@@ -29,4 +29,18 @@
 
  4. signature decetor 是啥 reset counter 啥意思？
 
+# Current method of ROP detection from (2015 ISC)
+ 1. StackPviot:check if stack is pviotted 
+ 2. Caller:check if critical functions was called and not returned into 
+ 3. SimExecFlow:Simulate the execution flow after the return address to detect subsequent ROP Gadgets
+ 4. MemProt:specail check on memory protections API
+ 5. LoadLib:check and prevent LoadLibrary calls againts UNC paths
+
+# Thought of Implementation 
+ - pass1 静态分析，信息获取（符号表,可用gadget之类的）。
+ - pass2 动态检测，根据静态分析信息，动态调整阈值。不用固定阈值，增加了检测器的适用范围，较少了前提假设的数量，感觉甚至可以不做关于阈值的前提假设。
+ - ! that is a break point to ROP-Hunt
+ - new feature: adjust Threshold dynamically
+ - 工作流程：对保护的应用，先做一次体检，然后再动态保护之。
+ - 如果程序及运行环境不更新，因为静态分析是在应用运行前完成的，所以不会增加动态保护时，程序runtime资源的消耗。
 

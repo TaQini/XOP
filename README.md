@@ -56,6 +56,8 @@
 # Thought of Implementation 
  - pass1 静态分析，信息获取（自身信息：符号表,可用gadget,环境信息：用的哪个链接库,库中含大量gadget...）。
  - pass2 动态检测，根据静态分析信息，动态调整阈值。不用固定阈值，增加了检测器的适用范围，较少了前提假设的数量，感觉甚至可以不做关于阈值的前提假设。
+ - above: 这种思想PIN已经想到,动态：JIT mode，静态：Probe mode。不谋而合呀！
+
  - ! that is a break point to ROP-Hunt
  - new feature: adjust Threshold dynamically __改进点在此__
  - 工作流程：对保护的应用，先做一次体检，然后再动态保护之。

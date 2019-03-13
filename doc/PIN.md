@@ -87,4 +87,11 @@ Get symbols of application
  - `INS_Rtn(INS)`		指令所在的函数
  - `INS_Address(INS)`	指令的地址
  - `INS_IsNop/IsCall/IsBranch/IsCall/IsRet(INS)`
- - 
+ - `IARG_BRANCH_TARGET_ADDR` addr of PC+1
+ - `IARG_INST_PTR`      addr of PC
+ - `BBL_InsertCall()`  basic block level insert
+
+# feature of Pin
+When calling an analysis procedure, Pin allows you to pass the instruction pointer, current value of registers, effective address of memory operations, constants, etc. 
+
+

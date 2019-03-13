@@ -1,0 +1,3 @@
+#!/bin/sh
+#socat tcp-l:1234,fork exec:'pin -t ./obj-intel64/MyPinTool.so -- ./demo'
+socat tcp-l:1234,fork exec:'./demo'

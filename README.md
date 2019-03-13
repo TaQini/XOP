@@ -69,4 +69,8 @@
  - another method: 提取gadget集合，记作setG，动态检测时比对程序流二进制代码片段，若是gadget链，则会连续或频繁击中gadget集合。缺陷，也将比对正常代码，资源消耗大。
  - ref a method: DBI这篇文章中4.3节最后一种检测方法值得思考借鉴。
 
+## 3.13 策略
+ - call 地址检测
+ - call-ret 平衡
+
 

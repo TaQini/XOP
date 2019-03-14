@@ -85,4 +85,24 @@ xxx:
 	0x400105 ret      -> ret to 0x400005
 # if the ret address is in range, count it.
 ```
+### stack of return address 
+ - 新增策略：返回地址栈
+ - stack.H
+ - push: Ai: address of next ins of call 
+ - pop : Bi: target address of ret ins
+ - check: Ai ? Bi
+ ```
+ case Ai == Bi -> nothing wrong
+ case Ai != Bi -> Bi is malicious code, maybe gadget
+ ```
+
+### ouput of call-ret detector
+![output](./detector_1.png)
+ - see more -> outFile_attack 
+
+### What's more: Method to protect from attack
+	- API: `INS_Delete()`
+	- Delete malicious code, then recovery the control flow
+	- advance: No need to exit process when attack is detected
+	- unfinished
 

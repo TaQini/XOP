@@ -1,9 +1,13 @@
 #include "pin.H"
+#include "stack.H"
 #include <iostream>
 #include <fstream>
 
 // #define LIBC "/lib/x86_64-linux-gnu/libc.so.6"
 #define LIBC "/lib/i386-linux-gnu/libc.so.6"
+#define RET 1
+#define CALL 2
+#define BRANCH 4
 
 // static int g_count = 0;
 static int c_count = 0;
@@ -17,16 +21,8 @@ static ADDRINT execHigh;
 static ADDRINT mainLow;
 static ADDRINT mainHigh;
 
-#define RET 1
-#define CALL 2
-#define BRANCH 4
+static LinkStack* lstack;
 
-/* ===================================================================== */
-/* Global Variables */
-/* ===================================================================== */
-
-/* ===================================================================== */
-/* Print Help Message                                                    */
 /* ===================================================================== */
 
 INT32 Usage() {
@@ -40,12 +36,7 @@ VOID ImageLoad(IMG img, VOID *v) {
 	if(IMG_Name(img).compare(LIBC) == 0) {
 		libcLow = IMG_LowAddress(img);
 		libcHigh = IMG_HighAddress(img);
-
-		// consider __libc_start_main+229 the begining of trace
-		// RTN rtn__libc_start_main = RTN_FindByName(img, "__libc_start_main");
-		// start_main = RTN_Address(rtn__libc_start_main) + 229;
 	}
-
 	if(IMG_IsMainExecutable(img)) {
 		execLow = IMG_LowAddress(img);
 		execHigh = IMG_HighAddress(img);
@@ -55,31 +46,30 @@ VOID ImageLoad(IMG img, VOID *v) {
 		RTN rtn_main = RTN_FindByName(img, "main");
 		mainLow  = RTN_Address(rtn_main);
 		mainHigh = mainLow + RTN_Size(rtn_main) - 1 ;
-
 		// cerr << std::hex << "Func Main: 0x" << mainLow << " - 0x" << mainHigh << endl;
 	}
 }
 
 // Pin calls this function every time a new rtn is executed
-// VOID Routine(RTN rtn, VOID *v) {
-//     rc->_name = RTN_Name(rtn);
-//     rc->_image = StripPath(IMG_Name(SEC_Img(RTN_Sec(rtn))).c_str());
-//     rc->_address = RTN_Address(rtn);
-//     rc->_icount = 0;
-//     rc->_rtnCount = 0;
-//     // Add to list of routines
-//     rc->_next = RtnList;
-//     RtnList = rc;
-//     RTN_Open(rtn);
-//     // Insert a call at the entry point of a routine to increment the call count
-//     RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)docount, IARG_PTR, &(rc->_rtnCount), IARG_END);
-//     // For each instruction of the routine
-//     for (INS ins = RTN_InsHead(rtn); INS_Valid(ins); ins = INS_Next(ins)) {
-//         // Insert a call to docount to increment the instruction counter for this rtn
-//         INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)docount, IARG_PTR, &(rc->_icount), IARG_END);
-//     }
-//     RTN_Close(rtn);
-// }
+VOID Routine(RTN rtn, VOID *v) {
+    // rc->_name = RTN_Name(rtn);
+    // rc->_image = StripPath(IMG_Name(SEC_Img(RTN_Sec(rtn))).c_str());
+    // rc->_address = RTN_Address(rtn);
+    // rc->_icount = 0;
+    // rc->_rtnCount = 0;
+    // // Add to list of routines
+    // rc->_next = RtnList;
+    // RtnList = rc;
+    // RTN_Open(rtn);
+    // // Insert a call at the entry point of a routine to increment the call count
+    // RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)docount, IARG_PTR, &(rc->_rtnCount), IARG_END);
+    // // For each instruction of the routine
+    // for (INS ins = RTN_InsHead(rtn); INS_Valid(ins); ins = INS_Next(ins)) {
+    //     // Insert a call to docount to increment the instruction counter for this rtn
+    //     INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)docount, IARG_PTR, &(rc->_icount), IARG_END);
+    // }
+    // RTN_Close(rtn);
+}
 
 /* ===================================================================== */
 // VOID g_counter(){g_count++;}
@@ -91,6 +81,8 @@ VOID c_counter(ADDRINT ip, ADDRINT next){
 		c_count++;
 		cerr << "call[" << std::dec << c_count  << "] @ 0x"<< std::hex << ip << endl;
 		cerr << "next: 0x" << std::hex << next << endl;
+		STK_Push(lstack ,next);
+		STK_Show(lstack);
 	}
 }
 
@@ -100,6 +92,11 @@ VOID r_counter(ADDRINT ip, ADDRINT next){
 	if((next < execHigh && next > execLow) || (next < libcHigh && next > libcLow)){
 		r_count++;
 		cerr << "ret[" << std::dec << r_count  << "] @ 0x"<< std::hex << next << endl;
+		ADDRINT ret = STK_Pop(lstack);
+		if(ret != next){
+			cerr << "Gadget Found!!! addr: 0x" << next << endl;
+		}
+		STK_Show(lstack);
 	}
 }
 
@@ -115,12 +112,6 @@ INT32 check(INS ins){
 	return(INS_IsRet(ins) | INS_IsCall(ins) << 1 | INS_IsBranch(ins) << 2);
 }
 
-// print pc and next pc
-// VOID printip(VOID *ip, VOID *next) { 
-//     cerr << "[--] " << std::hex << ip << endl;
-// 	cerr << "[->] " << std::hex << next << endl << endl;
-// }
-
 VOID Instruction(INS ins, VOID *v) {
 	int flag = check(ins);
 	ADDRINT ip = INS_Address(ins);
@@ -129,9 +120,6 @@ VOID Instruction(INS ins, VOID *v) {
 			IARG_BRANCH_TARGET_ADDR, 
 			IARG_END);
 	}
-	// if(ip == start_main){
-	// 	trace = 1;
-	// }
 	if (trace == 1){
 		if(flag & CALL){
 			INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)c_counter, 
@@ -155,10 +143,13 @@ VOID Instruction(INS ins, VOID *v) {
 	if (ip == mainHigh){
 		trace = -1;
 	}
+	// xop attack detector
+	// if(STK_IsEmpty(lstack) && trace == 1){
 	if(r_count > c_count){
 		cerr << "WARNNING!" << endl;
 		// exit(0);
 	}
+
 	// if(xxx jop? ){
 	// 	INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)xxxx, IARG_END);
 	// }
@@ -177,6 +168,9 @@ VOID Fini(INT32 code, VOID *v) {
 /* ===================================================================== */
 
 int main(int argc, char *argv[]) {
+
+	lstack = new(LinkStack);
+	STK_Init(lstack);
 
 	PIN_InitSymbols();
 

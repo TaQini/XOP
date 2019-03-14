@@ -2,18 +2,18 @@
 #include <iostream>
 #include <fstream>
 
-#define LIBC "/lib/x86_64-linux-gnu/libc.so.6"
+// #define LIBC "/lib/x86_64-linux-gnu/libc.so.6"
+#define LIBC "/lib/i386-linux-gnu/libc.so.6"
 
 // static int g_count = 0;
 static int c_count = 0;
 static int r_count = 0;
-static bool trace = 0;
+static int trace = 0;
 
 static ADDRINT libcLow;
 static ADDRINT libcHigh;
 static ADDRINT execLow;
 static ADDRINT execHigh;
-static ADDRINT start_main;
 static ADDRINT mainLow;
 static ADDRINT mainHigh;
 
@@ -42,8 +42,8 @@ VOID ImageLoad(IMG img, VOID *v) {
 		libcHigh = IMG_HighAddress(img);
 
 		// consider __libc_start_main+229 the begining of trace
-		RTN rtn__libc_start_main = RTN_FindByName(img, "__libc_start_main");
-		start_main = RTN_Address(rtn__libc_start_main) + 229;
+		// RTN rtn__libc_start_main = RTN_FindByName(img, "__libc_start_main");
+		// start_main = RTN_Address(rtn__libc_start_main) + 229;
 	}
 
 	if(IMG_IsMainExecutable(img)) {
@@ -103,6 +103,14 @@ VOID r_counter(ADDRINT ip, ADDRINT next){
 	}
 }
 
+// consider ins calling main the begining of trace
+VOID start_trace(ADDRINT ip){
+	if (ip == mainLow){
+		trace = 1;
+		c_counter(0xdeadbeef, ip);
+	}
+}
+
 INT32 check(INS ins){
 	return(INS_IsRet(ins) | INS_IsCall(ins) << 1 | INS_IsBranch(ins) << 2);
 }
@@ -116,10 +124,15 @@ INT32 check(INS ins){
 VOID Instruction(INS ins, VOID *v) {
 	int flag = check(ins);
 	ADDRINT ip = INS_Address(ins);
-	if (ip == start_main){
-		trace = 1;
+	if(trace == 0 && flag){
+		INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)start_trace, 
+			IARG_BRANCH_TARGET_ADDR, 
+			IARG_END);
 	}
-	if (trace){
+	// if(ip == start_main){
+	// 	trace = 1;
+	// }
+	if (trace == 1){
 		if(flag & CALL){
 			INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)c_counter, 
 				IARG_INST_PTR, 
@@ -132,12 +145,19 @@ VOID Instruction(INS ins, VOID *v) {
 				IARG_BRANCH_TARGET_ADDR, 
 				IARG_END);
 		}
+		if(flag & BRANCH){
+			// INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)r_counter, 
+			// 	IARG_INST_PTR, 
+			// 	IARG_BRANCH_TARGET_ADDR, 
+			// 	IARG_END);
+		}
 	}
 	if (ip == mainHigh){
-		trace = 0;
+		trace = -1;
 	}
 	if(r_count > c_count){
 		cerr << "WARNNING!" << endl;
+		// exit(0);
 	}
 	// if(xxx jop? ){
 	// 	INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)xxxx, IARG_END);

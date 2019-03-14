@@ -2,7 +2,7 @@
 from pwn import *
 
 #p = process('001')
-p=remote('192.168.152.130','1245')
+p=remote('127.0.0.1','1234')
 elf = ELF('./001')
 libc = ELF('./libc.so.6')
 

@@ -1,10 +1,8 @@
-# Environment: Virtual Machine
-	- 32-bit Ubuntu
-	- username: xop
-	- pwd: xop@TaQini
-	- kernel: 4.4.0-31-generic
-    - arch: i686
-	- relaese: 14.04.5
+# Environment: my ubuntu 18.04
+	- 64-bit Ubuntu
+	- kernel: 4.15.0-45-generic
+    - arch: x86\_64
+	- relaese: 18.04.2
 
 # question
 ## paper translation
@@ -22,12 +20,12 @@
 '''
  此后提出的delay gadget, ROP Hunt选择忽略，若将payload整合进delay gadget，则可以实现绕过Hunt检测。
 
-
  2. gadget, runtime 之类的术语是否需要翻译？
-
+  - 不了
  3. prototype 如何翻译
-
+  - 原型
  4. signature decetor 是啥 reset counter 啥意思？
+  - 長度特徵檢測器, 用於識別連續gadget
 
 # Current method of ROP detection from (2015 ISC)
  1. 栈迁移检测 StackPviot: check if stack is pviotted 
@@ -46,7 +44,6 @@
  3. Input Scanning         扫描用户输入
  4. Instruction Rewriting  指令重构
  5. Memory Randomization.  内存随机化
-
 
 # feature of gadget
  1. 短（长的用副作用）
@@ -68,6 +65,8 @@
 
  - another method: 提取gadget集合，记作setG，动态检测时比对程序流二进制代码片段，若是gadget链，则会连续或频繁击中gadget集合。缺陷，也将比对正常代码，资源消耗大。
  - ref a method: DBI这篇文章中4.3节最后一种检测方法值得思考借鉴。
+
+ - 以上方法並不好用，經過討論後，有了如下策略：
 
 ## 3.13 策略
  - call 地址检测

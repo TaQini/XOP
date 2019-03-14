@@ -73,4 +73,17 @@
  - call 地址检测
  - call-ret 平衡
 
+### call-ret balence
+ - range: count the call and ret ins in elf and libc
+```
+# e.g.
+	0x400003 call xxx <- call ins
+	0x400005 ins what <- ret point after call proceduce
+# if the ret point of call is in range, count it.
+xxx:
+	# ....
+	0x400104 leave
+	0x400105 ret      -> ret to 0x400005
+# if the ret address is in range, count it.
+```
 

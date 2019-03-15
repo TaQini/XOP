@@ -9,6 +9,10 @@
 #define CALL 2
 #define BRANCH 4
 
+#define STK_DECT 1
+#define CRB_DECT 1
+#define DEBUG 0
+
 // static int g_count = 0;
 static int c_count = 0;
 static int r_count = 0;
@@ -79,10 +83,17 @@ VOID c_counter(ADDRINT ip, ADDRINT next){
 	//if ins is call and it's next address is in below range (ignore other unrelated place), count it.
 	if((next < execHigh && next > execLow) || (next < libcHigh && next > libcLow)){
 		c_count++;
-		cerr << "call[" << std::dec << c_count  << "] @ 0x"<< std::hex << ip << endl;
-		cerr << "next: 0x" << std::hex << next << endl;
-		STK_Push(lstack ,next);
-		STK_Show(lstack);
+		if(STK_DECT){
+			STK_Push(lstack ,next);
+			if(DEBUG) {
+				cerr << "Pushed: 0x" << std::hex << next << endl;
+				STK_Show(lstack);
+			}
+		}
+		if(DEBUG){
+			cerr << "call[" << std::dec << c_count  << "] @ 0x"<< std::hex << ip << endl;
+			cerr << "next: 0x" << std::hex << next << endl;
+		}
 	}
 }
 
@@ -91,12 +102,19 @@ VOID r_counter(ADDRINT ip, ADDRINT next){
 	//if ins is ret and it would return in below range of address (ignore other unrelated place), count it.
 	if((next < execHigh && next > execLow) || (next < libcHigh && next > libcLow)){
 		r_count++;
-		cerr << "ret[" << std::dec << r_count  << "] @ 0x"<< std::hex << next << endl;
-		ADDRINT ret = STK_Pop(lstack);
-		if(ret != next){
-			cerr << "Gadget Found!!! addr: 0x" << next << endl;
+		if(STK_DECT){
+			ADDRINT ret = STK_Pop(lstack);
+			if(DEBUG) {
+				STK_Show(lstack);
+				cerr << "Poped: 0x" << std::hex << ret << endl;
+			}
+			if(ret != next){
+				cerr << "[STK] Gadget Found!!! addr: 0x" << std::hex << next << endl;
+			}
 		}
-		STK_Show(lstack);
+		if(DEBUG){
+			cerr << "ret[" << std::dec << r_count  << "] @ 0x"<< std::hex << next << endl;
+		}
 	}
 }
 
@@ -124,7 +142,7 @@ VOID Instruction(INS ins, VOID *v) {
 		if(flag & CALL){
 			INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)c_counter, 
 				IARG_INST_PTR, 
-				IARG_ADDRINT, (ADDRINT)INS_NextAddress(ins),
+				IARG_ADDRINT, INS_NextAddress(ins),
 				IARG_END);
 		}
 		if(flag & RET){
@@ -145,8 +163,8 @@ VOID Instruction(INS ins, VOID *v) {
 	}
 	// xop attack detector
 	// if(STK_IsEmpty(lstack) && trace == 1){
-	if(r_count > c_count){
-		cerr << "WARNNING!" << endl;
+	if( CRB_DECT && r_count > c_count ){
+		cerr << "[CRB] WARNNING!!!" << endl;
 		// exit(0);
 	}
 

@@ -1,8 +1,8 @@
 #!/usr/bin/python 
 from pwn import *
 
-#p = process('001')
-p=remote('127.0.0.1','1234')
+p = process('001')
+#p=remote('127.0.0.1','1234')
 elf = ELF('./001')
 libc = ELF('./libc.so.6')
 

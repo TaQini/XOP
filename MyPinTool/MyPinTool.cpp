@@ -3,8 +3,8 @@
 #include <iostream>
 #include <fstream>
 
-// #define LIBC "/lib/x86_64-linux-gnu/libc.so.6"
-#define LIBC "/lib/i386-linux-gnu/libc.so.6"
+// #define LIBC "/lib/x86_64-linux-gnu/libc.so.6" // 64-bit
+#define LIBC "/lib/i386-linux-gnu/libc.so.6" //32-bit
 #define RET 1
 #define CALL 2
 #define BRANCH 4
@@ -13,7 +13,6 @@
 #define CRB_DECT 1
 #define DEBUG 0
 
-// static int g_count = 0;
 static int c_count = 0;
 static int r_count = 0;
 static int trace = 0;
@@ -44,13 +43,11 @@ VOID ImageLoad(IMG img, VOID *v) {
 	if(IMG_IsMainExecutable(img)) {
 		execLow = IMG_LowAddress(img);
 		execHigh = IMG_HighAddress(img);
-		// cerr << std::hex << "MainImg loaded: 0x" << execLow << " - 0x" << execHigh << endl;
 
 		// consider the last ins of main the terminal of trace
 		RTN rtn_main = RTN_FindByName(img, "main");
 		mainLow  = RTN_Address(rtn_main);
 		mainHigh = mainLow + RTN_Size(rtn_main) - 1 ;
-		// cerr << std::hex << "Func Main: 0x" << mainLow << " - 0x" << mainHigh << endl;
 	}
 }
 
@@ -76,7 +73,6 @@ VOID Routine(RTN rtn, VOID *v) {
 }
 
 /* ===================================================================== */
-// VOID g_counter(){g_count++;}
 
 // count the number of call ins
 VOID c_counter(ADDRINT ip, ADDRINT next){
@@ -186,7 +182,6 @@ VOID Fini(INT32 code, VOID *v) {
 /* ===================================================================== */
 
 int main(int argc, char *argv[]) {
-
 	lstack = new(LinkStack);
 	STK_Init(lstack);
 

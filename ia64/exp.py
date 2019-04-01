@@ -6,8 +6,8 @@ from pwn import *
 #context.log_level = 'debug'
 
 # load program
-# p = process('./demo')
-p = remote('127.0.0.1',1234)
+p = process('./demo')
+#p = remote('127.0.0.1',1234)
 
 # get info from ELF
 elf = ELF('demo')

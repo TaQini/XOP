@@ -47,9 +47,9 @@ BOOL STK_IsEmpty(LinkStack *s){
 
 VOID STK_Show(LinkStack *s){
 	LinkStack *p;
-	cerr << "|---------------------------------|" << endl;
+	cerr << "|-------------------------------|" << endl;
 	for(p = s -> next; p -> next; p = p -> next){
-		cerr << "| 0x" << p << " | 0x" << hex << p -> addr << " |" << endl;
+		cerr << "| " << p << " | 0x" << hex << p -> addr << " |" << endl;
 	}	
-	cerr << "|---------------------------------|" << endl;
+	cerr << "|-------------------------------|" << endl;
 }

@@ -51,6 +51,11 @@ VOID ImageLoad(IMG img, VOID *v) {
 		mainLow  = RTN_Address(rtn_main);
 		mainHigh = mainLow + RTN_Size(rtn_main) - 1 ;
 
+		// Forward pass over all symbols in an image
+		for( SYM sym= IMG_RegsymHead(img); SYM_Valid(sym); sym = SYM_Next(sym) ){
+			cerr << "symbol: " << SYM_Name(sym) << " @ " ;
+			cerr << hex << "0x" << SYM_Address(sym) << endl;
+		}
 	}
 }
 
@@ -118,6 +123,15 @@ VOID r_counter(ADDRINT ip, ADDRINT next){
 	}
 }
 
+// count the number of branch ins
+VOID b_check(ADDRINT ip, ADDRINT next){
+	//if ins is ret and it would return in below range of address (ignore other unrelated place), count it.
+	if((ip < execHigh && ip > execLow) || (ip < libcHigh && ip > libcLow)){
+		// cerr << "branch @ 0x" << hex << ip << " -> 0x" << next << endl;
+		
+	}
+}
+
 // consider ins calling main the begining of trace
 VOID start_trace(ADDRINT ip, ADDRINT target, ADDRINT next){
 	if (target == mainLow){
@@ -154,10 +168,10 @@ VOID Instruction(INS ins, VOID *v) {
 				IARG_END);
 		}
 		if(flag & BRANCH){
-			// INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)r_counter, 
-			// 	IARG_INST_PTR, 
-			// 	IARG_BRANCH_TARGET_ADDR, 
-			// 	IARG_END);
+			INS_InsertCall(ins, IPOINT_TAKEN_BRANCH, (AFUNPTR)b_check, 
+				IARG_INST_PTR, 
+				IARG_BRANCH_TARGET_ADDR, 
+				IARG_END);
 		}
 	}
 	if (ip == mainHigh){
@@ -227,3 +241,6 @@ int main(int argc, char *argv[]) {
 
 // shadowstack cannot handle jop
 // what to do when pin has vulnerability?
+
+// trace point set? 
+// some func(e.g. printf) in libc do not obey call-ret balance 

@@ -6,13 +6,15 @@ from pwn import *
 #context.log_level = 'debug'
 
 # load program
-p = process('./demo')
-#p = remote('127.0.0.1',1234)
+# p = process('./demo')
+#addr = '192.168.191.131'
+addr = "127.0.0.1"
+p = remote(addr,1234)
 
 # get info from ELF
 elf = ELF('demo')
 libc = ELF('libc.so.6')
-
+# libc = ELF('ubuntu')
 # infomation
 bss = elf.symbols['__bss_start']
 log.info("bss start at: " + hex(bss))

@@ -3,15 +3,15 @@
 #include <iostream>
 #include <fstream>
 
-// #define LIBC "/lib/x86_64-linux-gnu/libc.so.6" // 64-bit
-#define LIBC "/lib/i386-linux-gnu/libc.so.6" //32-bit
+#define LIBC "/lib/x86_64-linux-gnu/libc.so.6" // 64-bit
+// #define LIBC "/lib/i386-linux-gnu/libc.so.6" //32-bit
 #define RET 1
 #define CALL 2
 #define BRANCH 4
 
 #define STK_DECT 1
 #define CRB_DECT 1
-#define DEBUG 0
+#define DEBUG 1
 
 static int c_count = 0;
 static int r_count = 0;
@@ -39,15 +39,18 @@ VOID ImageLoad(IMG img, VOID *v) {
 	if(IMG_Name(img).compare(LIBC) == 0) {
 		libcLow = IMG_LowAddress(img);
 		libcHigh = IMG_HighAddress(img);
+		cerr << "libc loaded: 0x" << hex << libcLow << " - 0x" << libcHigh << endl;
 	}
 	if(IMG_IsMainExecutable(img)) {
 		execLow = IMG_LowAddress(img);
 		execHigh = IMG_HighAddress(img);
+		cerr << "text section: 0x" << hex << execLow << " - 0x" << execHigh << endl;
 
 		// consider the last ins of main the terminal of trace
 		RTN rtn_main = RTN_FindByName(img, "main");
 		mainLow  = RTN_Address(rtn_main);
 		mainHigh = mainLow + RTN_Size(rtn_main) - 1 ;
+
 	}
 }
 
@@ -106,6 +109,7 @@ VOID r_counter(ADDRINT ip, ADDRINT next){
 			}
 			if(ret != next){
 				cerr << "[STK] Gadget Found!!! addr: 0x" << std::hex << next << endl;
+				// exit(0);
 			}
 		}
 		if(DEBUG){
@@ -115,10 +119,10 @@ VOID r_counter(ADDRINT ip, ADDRINT next){
 }
 
 // consider ins calling main the begining of trace
-VOID start_trace(ADDRINT ip){
-	if (ip == mainLow){
+VOID start_trace(ADDRINT ip, ADDRINT target, ADDRINT next){
+	if (target == mainLow){
 		trace = 1;
-		c_counter(0xdeadbeef, ip);
+		c_counter(ip, next);
 	}
 }
 
@@ -131,7 +135,9 @@ VOID Instruction(INS ins, VOID *v) {
 	ADDRINT ip = INS_Address(ins);
 	if(trace == 0 && flag){
 		INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)start_trace, 
+			IARG_INST_PTR, 
 			IARG_BRANCH_TARGET_ADDR, 
+			IARG_ADDRINT, INS_NextAddress(ins),
 			IARG_END);
 	}
 	if (trace == 1){
@@ -210,3 +216,14 @@ int main(int argc, char *argv[]) {
 /* ===================================================================== */
 /* eof */
 /* ===================================================================== */
+// pin rop fram
+// - ins dect pos 
+// - method 
+// 1.addr cmp
+// 2.ins count
+// 3.gadget length
+// handel
+// ROP JOP return-into-libc
+
+// shadowstack cannot handle jop
+// what to do when pin has vulnerability?

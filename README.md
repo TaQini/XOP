@@ -67,10 +67,13 @@
  - ref a method: DBI这篇文章中4.3节最后一种检测方法值得思考借鉴。
 
  - 以上方法並不好用，經過討論後，有了如下策略：
-
+ - setF可以通过PIN API`IMG_RegsymHead`获取。
 ## 3.13 策略
  - call 地址检测
  - call-ret 平衡
+## 409 策略
+ - cop防御 只允许call text段
+ - 禁止GOT表二次修改
 
 ### call-ret balence
  - range: count the call and ret ins in elf and libc

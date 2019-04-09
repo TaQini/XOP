@@ -25,6 +25,7 @@ static ADDRINT mainLow;
 static ADDRINT mainHigh;
 
 static LinkStack* lstack;
+static LinkStack* symbols;
 
 /* ===================================================================== */
 
@@ -55,7 +56,9 @@ VOID ImageLoad(IMG img, VOID *v) {
 		for( SYM sym= IMG_RegsymHead(img); SYM_Valid(sym); sym = SYM_Next(sym) ){
 			cerr << "symbol: " << SYM_Name(sym) << " @ " ;
 			cerr << hex << "0x" << SYM_Address(sym) << endl;
+			STK_Push(symbols, SYM_Address(sym));
 		}
+		STK_Show(symbols);
 	}
 }
 
@@ -83,28 +86,38 @@ VOID Routine(RTN rtn, VOID *v) {
 /* ===================================================================== */
 
 // count the number of call ins
-VOID c_counter(ADDRINT ip, ADDRINT next){
+VOID c_counter(ADDRINT ip, ADDRINT target, ADDRINT next){
 	//if ins is call and it's next address is in below range (ignore other unrelated place), count it.
-	if((next < execHigh && next > execLow) || (next < libcHigh && next > libcLow)){
-		c_count++;
-		if(STK_DECT){
-			STK_Push(lstack ,next);
-			if(DEBUG) {
-				cerr << "Pushed: 0x" << std::hex << next << endl;
-				STK_Show(lstack);
+	if(next < execHigh && next > execLow){
+		if(STK_Search(symbols, target)){
+			if(next < libcHigh && next > libcLow){
+				return ; // do not trace call inside of function@libc
 			}
-		}
-		if(DEBUG){
-			cerr << "call[" << std::dec << c_count  << "] @ 0x"<< std::hex << ip << endl;
-			cerr << "next: 0x" << std::hex << next << endl;
+			c_count++;
+			if(STK_DECT){
+				STK_Push(lstack ,next);
+				if(DEBUG) {
+					cerr << "Pushed: 0x" << std::hex << next << endl;
+					STK_Show(lstack);
+				}
+			}
+			if(DEBUG){
+				cerr << "call[" << std::dec << c_count  << "] @ 0x"<< std::hex << ip << endl;
+				cerr << "call for 0x" << target << endl;
+				cerr << "next: 0x" << std::hex << next << endl;
+			}
+		}else{
+			cerr << "COP attack detected !!!";
+			cerr << "call for 0x" << target << " is invaild!!!" << endl;
 		}
 	}
 }
 
 // count the number of ret ins
-VOID r_counter(ADDRINT ip, ADDRINT next){
+VOID r_counter(ADDRINT ip, ADDRINT target){
 	//if ins is ret and it would return in below range of address (ignore other unrelated place), count it.
-	if((next < execHigh && next > execLow) || (next < libcHigh && next > libcLow)){
+	// if((target < execHigh && target > execLow) || (target < libcHigh && target > libcLow)){
+	if((target < execHigh && target > execLow)){
 		r_count++;
 		if(STK_DECT){
 			ADDRINT ret = STK_Pop(lstack);
@@ -112,13 +125,13 @@ VOID r_counter(ADDRINT ip, ADDRINT next){
 				STK_Show(lstack);
 				cerr << "Poped: 0x" << std::hex << ret << endl;
 			}
-			if(ret != next){
-				cerr << "[STK] Gadget Found!!! addr: 0x" << std::hex << next << endl;
+			if(ret != target){
+				cerr << "[STK] Gadget Found!!! addr: 0x" << std::hex << target << endl;
 				// exit(0);
 			}
 		}
 		if(DEBUG){
-			cerr << "ret[" << std::dec << r_count  << "] @ 0x"<< std::hex << next << endl;
+			cerr << "ret[" << std::dec << r_count  << "] @ 0x"<< std::hex << target << endl;
 		}
 	}
 }
@@ -136,7 +149,7 @@ VOID b_check(ADDRINT ip, ADDRINT next){
 VOID start_trace(ADDRINT ip, ADDRINT target, ADDRINT next){
 	if (target == mainLow){
 		trace = 1;
-		c_counter(ip, next);
+		c_counter(ip, target, next);
 	}
 }
 
@@ -158,6 +171,7 @@ VOID Instruction(INS ins, VOID *v) {
 		if(flag & CALL){
 			INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)c_counter, 
 				IARG_INST_PTR, 
+				IARG_BRANCH_TARGET_ADDR, 
 				IARG_ADDRINT, INS_NextAddress(ins),
 				IARG_END);
 		}
@@ -203,7 +217,9 @@ VOID Fini(INT32 code, VOID *v) {
 
 int main(int argc, char *argv[]) {
 	lstack = new(LinkStack);
+	symbols = new(LinkStack);
 	STK_Init(lstack);
+	STK_Init(symbols);
 
 	PIN_InitSymbols();
 

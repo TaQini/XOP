@@ -47,9 +47,19 @@ BOOL STK_IsEmpty(LinkStack *s){
 
 VOID STK_Show(LinkStack *s){
 	LinkStack *p;
-	cerr << "|-------------------------------|" << endl;
+	cerr << "|----mem---------------value----|" << endl;
 	for(p = s -> next; p -> next; p = p -> next){
 		cerr << "| " << p << " | 0x" << hex << p -> addr << " |" << endl;
-	}	
+	}
 	cerr << "|-------------------------------|" << endl;
+}
+
+BOOL STK_Search(LinkStack *s, ADDRINT addr){
+	LinkStack *p;
+	for(p = s -> next; p -> next; p = p -> next){
+		if(p -> addr == addr){
+			return 1;
+		}
+	}
+	return 0;
 }

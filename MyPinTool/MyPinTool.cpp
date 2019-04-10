@@ -11,6 +11,7 @@
 
 #define STK_DECT 1
 #define CRB_DECT 1
+#define COP_DECT 1
 #define DEBUG 1
 
 static int c_count = 0;
@@ -88,9 +89,9 @@ VOID Routine(RTN rtn, VOID *v) {
 // count the number of call ins
 VOID c_counter(ADDRINT ip, ADDRINT target, ADDRINT next){
 	//if ins is call and it's next address is in below range (ignore other unrelated place), count it.
-	if(next < execHigh && next > execLow){
+	if(target < execHigh && target > execLow){
 		if(STK_Search(symbols, target)){
-			if(next < libcHigh && next > libcLow){
+			if(target < libcHigh && target > libcLow){
 				return ; // do not trace call inside of function@libc
 			}
 			c_count++;
@@ -106,9 +107,11 @@ VOID c_counter(ADDRINT ip, ADDRINT target, ADDRINT next){
 				cerr << "call for 0x" << target << endl;
 				cerr << "next: 0x" << std::hex << next << endl;
 			}
-		}else{
-			cerr << "COP attack detected !!!";
+		}else if(COP_DECT){ // attacker call func@libc directly is disable, but overwrite got is able. 
+			cerr << "[COP] attack detected !!!";
 			cerr << "call for 0x" << target << " is invaild!!!" << endl;
+			// exit(0);
+			// need another method to defend got overwrite attack(JOP??)
 		}
 	}
 }
@@ -131,7 +134,7 @@ VOID r_counter(ADDRINT ip, ADDRINT target){
 			}
 		}
 		if(DEBUG){
-			cerr << "ret[" << std::dec << r_count  << "] @ 0x"<< std::hex << target << endl;
+			cerr << "ret[" << std::dec << r_count  << "] to 0x" << hex << target << "@ 0x"<< std::hex << ip << endl;
 		}
 	}
 }

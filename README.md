@@ -109,4 +109,14 @@ xxx:
 	- Delete malicious code, then recovery the control flow
 	- advance: No need to exit process when attack is detected
 	- unfinished
-
+## 64elf args
+ As defined in the x64 ABI (Application Binary Interface) - the following registers are used to pass arguments to functions:
+```
+rdi - first argument
+rsi - second argument
+rdx - third argument
+rcx - fourth argument
+r8 - fifth argument
+r9 - sixth argument
+[stack] - seven+ arguments
+```

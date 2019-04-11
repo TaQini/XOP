@@ -11,12 +11,12 @@
 
 #define STK_DECT 1
 #define CRB_DECT 1
-#define COP_DECT 1
+#define COP_DECT 0
 #define DEBUG 1
 
 static int c_count = 0;
 static int r_count = 0;
-static int trace = 0;
+// static int trace = 1;
 
 static ADDRINT libcLow;
 static ADDRINT libcHigh;
@@ -41,12 +41,12 @@ VOID ImageLoad(IMG img, VOID *v) {
 	if(IMG_Name(img).compare(LIBC) == 0) {
 		libcLow = IMG_LowAddress(img);
 		libcHigh = IMG_HighAddress(img);
-		cerr << "libc loaded: 0x" << hex << libcLow << " - 0x" << libcHigh << endl;
+		if(DEBUG) cerr << "libc loaded: 0x" << hex << libcLow << " - 0x" << libcHigh << endl;
 	}
 	if(IMG_IsMainExecutable(img)) {
 		execLow = IMG_LowAddress(img);
 		execHigh = IMG_HighAddress(img);
-		cerr << "text section: 0x" << hex << execLow << " - 0x" << execHigh << endl;
+		if(DEBUG) cerr << "text section: 0x" << hex << execLow << " - 0x" << execHigh << endl;
 
 		// consider the last ins of main the terminal of trace
 		RTN rtn_main = RTN_FindByName(img, "main");
@@ -55,41 +55,21 @@ VOID ImageLoad(IMG img, VOID *v) {
 
 		// Forward pass over all symbols in an image
 		for( SYM sym= IMG_RegsymHead(img); SYM_Valid(sym); sym = SYM_Next(sym) ){
-			cerr << "symbol: " << SYM_Name(sym) << " @ " ;
-			cerr << hex << "0x" << SYM_Address(sym) << endl;
 			STK_Push(symbols, SYM_Address(sym));
+			if(DEBUG){
+				cerr << "symbol: " << SYM_Name(sym) << " @ " ;
+				cerr << hex << "0x" << SYM_Address(sym) << endl;				
+			}
 		}
-		STK_Show(symbols);
+		if(DEBUG) STK_Show(symbols);
 	}
 }
-
-// Pin calls this function every time a new rtn is executed
-VOID Routine(RTN rtn, VOID *v) {
-    // rc->_name = RTN_Name(rtn);
-    // rc->_image = StripPath(IMG_Name(SEC_Img(RTN_Sec(rtn))).c_str());
-    // rc->_address = RTN_Address(rtn);
-    // rc->_icount = 0;
-    // rc->_rtnCount = 0;
-    // // Add to list of routines
-    // rc->_next = RtnList;
-    // RtnList = rc;
-    // RTN_Open(rtn);
-    // // Insert a call at the entry point of a routine to increment the call count
-    // RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)docount, IARG_PTR, &(rc->_rtnCount), IARG_END);
-    // // For each instruction of the routine
-    // for (INS ins = RTN_InsHead(rtn); INS_Valid(ins); ins = INS_Next(ins)) {
-    //     // Insert a call to docount to increment the instruction counter for this rtn
-    //     INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)docount, IARG_PTR, &(rc->_icount), IARG_END);
-    // }
-    // RTN_Close(rtn);
-}
-
 /* ===================================================================== */
 
 // count the number of call ins
 VOID c_counter(ADDRINT ip, ADDRINT target, ADDRINT next){
 	//if ins is call and it's next address is in below range (ignore other unrelated place), count it.
-	if(target < execHigh && target > execLow){
+	if(next < execHigh && next > execLow){
 		if(STK_Search(symbols, target)){
 			if(target < libcHigh && target > libcLow){
 				return ; // do not trace call inside of function@libc
@@ -107,12 +87,16 @@ VOID c_counter(ADDRINT ip, ADDRINT target, ADDRINT next){
 				cerr << "call for 0x" << target << endl;
 				cerr << "next: 0x" << std::hex << next << endl;
 			}
-		}else if(COP_DECT){ // attacker call func@libc directly is disable, but overwrite got is able. 
-			cerr << "[COP] attack detected !!!";
-			cerr << "call for 0x" << target << " is invaild!!!" << endl;
-			// exit(0);
-			// need another method to defend got overwrite attack(JOP??)
 		}
+		// else if(COP_DECT){ // attacker call func@libc directly from text section is disable, but overwrite got is able. 
+		// 	cerr << "[COP] attack detected !!!";
+		// 	cerr << "call for 0x" << target << " is invaild!!!" << endl;
+		// 	// exit(0);
+		// 	// need another method to defend got overwrite attack(JOP??)
+		// }
+	}
+	if(next < libcHigh && next > libcLow){
+		c_count++;
 	}
 }
 
@@ -134,27 +118,30 @@ VOID r_counter(ADDRINT ip, ADDRINT target){
 			}
 		}
 		if(DEBUG){
-			cerr << "ret[" << std::dec << r_count  << "] to 0x" << hex << target << "@ 0x"<< std::hex << ip << endl;
+			cerr << "ret[" << std::dec << r_count  << "] to 0x" << hex << target << " @ 0x"<< std::hex << ip << endl;
 		}
 	}
+	if(target < libcHigh && target > libcLow){
+		r_count++;
+	}
 }
+
 
 // count the number of branch ins
 VOID b_check(ADDRINT ip, ADDRINT next){
 	//if ins is ret and it would return in below range of address (ignore other unrelated place), count it.
 	if((ip < execHigh && ip > execLow) || (ip < libcHigh && ip > libcLow)){
 		// cerr << "branch @ 0x" << hex << ip << " -> 0x" << next << endl;
-		
 	}
 }
 
 // consider ins calling main the begining of trace
-VOID start_trace(ADDRINT ip, ADDRINT target, ADDRINT next){
-	if (target == mainLow){
-		trace = 1;
-		c_counter(ip, target, next);
-	}
-}
+// VOID start_trace(ADDRINT ip, ADDRINT target, ADDRINT next){
+// 	if (target == mainLow){
+// 		trace = 1;
+// 		c_counter(ip, target, next);
+// 	}
+// }
 
 INT32 check(INS ins){
 	return(INS_IsRet(ins) | INS_IsCall(ins) << 1 | INS_IsBranch(ins) << 2);
@@ -162,15 +149,15 @@ INT32 check(INS ins){
 
 VOID Instruction(INS ins, VOID *v) {
 	int flag = check(ins);
-	ADDRINT ip = INS_Address(ins);
-	if(trace == 0 && flag){
-		INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)start_trace, 
-			IARG_INST_PTR, 
-			IARG_BRANCH_TARGET_ADDR, 
-			IARG_ADDRINT, INS_NextAddress(ins),
-			IARG_END);
-	}
-	if (trace == 1){
+	// ADDRINT ip = INS_Address(ins);
+	// if(trace == 0 && flag){
+	// 	INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)start_trace, 
+	// 		IARG_INST_PTR, 
+	// 		IARG_BRANCH_TARGET_ADDR, 
+	// 		IARG_ADDRINT, INS_NextAddress(ins),
+	// 		IARG_END);
+	// }
+	// if (trace == 1){
 		if(flag & CALL){
 			INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)c_counter, 
 				IARG_INST_PTR, 
@@ -190,10 +177,10 @@ VOID Instruction(INS ins, VOID *v) {
 				IARG_BRANCH_TARGET_ADDR, 
 				IARG_END);
 		}
-	}
-	if (ip == mainHigh){
-		trace = -1;
-	}
+	// }
+	// if (ip == mainHigh){
+	// 	trace = -1;
+	// }
 	// xop attack detector
 	// if(STK_IsEmpty(lstack) && trace == 1){
 	if( CRB_DECT && r_count > c_count ){

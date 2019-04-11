@@ -128,7 +128,11 @@ r9 - sixth argument
 3. libc gadget
 4. libc vulner
 5. ia32
+6. stack povit
+7. got overwrite
 
+7. got overwrite
 ## dect
 1. stk
 2. crb
+3. got cmp

@@ -1,7 +1,9 @@
 #include <iostream>
 
 struct LinkStack{
+	string name;
 	ADDRINT addr;
+	ADDRINT addr2;
 	struct LinkStack* next;
 	struct LinkStack* pre;
 };
@@ -18,6 +20,16 @@ VOID STK_Init(LinkStack *top){
 
 VOID STK_Push(LinkStack *s, ADDRINT addr){
 	LinkStack *p = new(LinkStack);
+	p -> addr = addr;
+	p -> pre = s;
+	p -> next = s -> next;
+	s -> next -> pre = p;
+	s -> next = p;
+}
+
+VOID STK_Push2(LinkStack *s, string name, ADDRINT addr){
+	LinkStack *p = new(LinkStack);
+	p -> name = name;
 	p -> addr = addr;
 	p -> pre = s;
 	p -> next = s -> next;
@@ -54,6 +66,15 @@ VOID STK_Show(LinkStack *s){
 	cerr << "|-------------------------------|" << endl;
 }
 
+VOID STK_Show2(LinkStack *s){
+	LinkStack *p;
+	cerr << "|----mem---------------value----|" << endl;
+	for(p = s -> next; p -> next; p = p -> next){
+		cerr << "| " << p->name << " | 0x" << hex << p -> addr << " |" << endl;
+	}
+	cerr << "|-------------------------------|" << endl;
+}
+
 BOOL STK_Search(LinkStack *s, ADDRINT addr){
 	LinkStack *p;
 	for(p = s -> next; p -> next; p = p -> next){
@@ -63,3 +84,27 @@ BOOL STK_Search(LinkStack *s, ADDRINT addr){
 	}
 	return 0;
 }
+
+string STK_QueryNameByAddr(LinkStack *s, ADDRINT addr){
+	string name;
+	LinkStack *p;
+	for(p = s -> next; p -> next; p = p -> next){
+		if(p -> addr == addr){
+			name = p->name;
+			return name;
+		}
+	}
+	return NULL;
+}
+
+// BOOL STK_Cmp(LinkStack *sa, LinkStack *sb, ADDRINT pa, ADDRINT pb){
+// 	string namea = STK_QueryNameByAddr(sa, pa);
+// 	string nameb = STK_QueryNameByAddr(sb, pb);
+// 	cerr << "namea: " << namea << " | nameb: " << nameb << endl;
+// 	if(namea==nameb){
+// 		return 1;
+// 	}
+// 	else{
+// 		return 0;
+// 	}
+// }

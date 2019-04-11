@@ -11,7 +11,7 @@
 
 #define STK_DECT 1
 #define CRB_DECT 1
-#define COP_DECT 0
+#define JOP_DECT 1
 #define DEBUG 1
 
 static int c_count = 0;
@@ -27,6 +27,7 @@ static ADDRINT mainHigh;
 
 static LinkStack* lstack;
 static LinkStack* symbols;
+static LinkStack* symbols_libc;
 
 /* ===================================================================== */
 
@@ -42,6 +43,14 @@ VOID ImageLoad(IMG img, VOID *v) {
 		libcLow = IMG_LowAddress(img);
 		libcHigh = IMG_HighAddress(img);
 		if(DEBUG) cerr << "libc loaded: 0x" << hex << libcLow << " - 0x" << libcHigh << endl;
+		for( SYM sym= IMG_RegsymHead(img); SYM_Valid(sym); sym = SYM_Next(sym) ){
+			STK_Push2(symbols_libc, SYM_Name(sym), SYM_Address(sym));
+			if(DEBUG){
+				// cerr << "symbol: " << SYM_Name(sym) << " @ " ;
+				// cerr << hex << "0x" << SYM_Address(sym) << endl;
+			}
+		}
+		if(DEBUG) STK_Show2(symbols_libc);
 	}
 	if(IMG_IsMainExecutable(img)) {
 		execLow = IMG_LowAddress(img);
@@ -55,13 +64,13 @@ VOID ImageLoad(IMG img, VOID *v) {
 
 		// Forward pass over all symbols in an image
 		for( SYM sym= IMG_RegsymHead(img); SYM_Valid(sym); sym = SYM_Next(sym) ){
-			STK_Push(symbols, SYM_Address(sym));
+			STK_Push2(symbols, SYM_Name(sym), SYM_Address(sym));
 			if(DEBUG){
-				cerr << "symbol: " << SYM_Name(sym) << " @ " ;
-				cerr << hex << "0x" << SYM_Address(sym) << endl;				
+				// cerr << "symbol: " << SYM_Name(sym) << " @ " ;
+				// cerr << hex << "0x" << SYM_Address(sym) << endl;				
 			}
 		}
-		if(DEBUG) STK_Show(symbols);
+		if(DEBUG) STK_Show2(symbols);
 	}
 }
 /* ===================================================================== */
@@ -126,13 +135,27 @@ VOID r_counter(ADDRINT ip, ADDRINT target){
 	}
 }
 
-
 // count the number of branch ins
-VOID b_check(ADDRINT ip, ADDRINT next){
-	//if ins is ret and it would return in below range of address (ignore other unrelated place), count it.
-	if((ip < execHigh && ip > execLow) || (ip < libcHigh && ip > libcLow)){
-		// cerr << "branch @ 0x" << hex << ip << " -> 0x" << next << endl;
+VOID b_check(ADDRINT ip, ADDRINT target){
+	if(STK_Search(symbols, ip) && JOP_DECT){
+		cerr << hex << "jmp @ 0x" << ip << " to 0x" << target << endl;
+		// got can be modified only 1 time
+		if(target < execHigh && target > execLow){
+			// cerr << "branch @ 0x" << hex << ip << " -> 0x" << next << endl;
+		}
+		else{
+			string a = STK_QueryNameByAddr(symbols_libc, target);
+			string b = STK_QueryNameByAddr(symbols, ip);
+			cerr << "a: " << a << " | b: " << b << endl;
+			if( b == a+"@plt"){
+				// cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!yes" << endl;
+			}
+			else{
+				cerr << "[JOP] got overwrite dect!!!!!" << endl;
+			}
+		}
 	}
+	//if ins is ret and it would return in below range of address (ignore other unrelated place), count it.
 }
 
 // consider ins calling main the begining of trace
@@ -208,8 +231,11 @@ VOID Fini(INT32 code, VOID *v) {
 int main(int argc, char *argv[]) {
 	lstack = new(LinkStack);
 	symbols = new(LinkStack);
+	symbols_libc = new(LinkStack);
+
 	STK_Init(lstack);
 	STK_Init(symbols);
+	STK_Init(symbols_libc);
 
 	PIN_InitSymbols();
 

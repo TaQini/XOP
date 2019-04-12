@@ -3,8 +3,9 @@
 #include <iostream>
 #include <fstream>
 
-#define LIBC "/lib/x86_64-linux-gnu/libc.so.6" // 64-bit
+// #define LIBC "/lib/x86_64-linux-gnu/libc.so.6" // 64-bit
 // #define LIBC "/lib/i386-linux-gnu/libc.so.6" //32-bit
+#define LIBC "libc.so.6" //general
 #define RET 1
 #define CALL 2
 #define BRANCH 4
@@ -16,14 +17,12 @@
 
 static int c_count = 0;
 static int r_count = 0;
-// static int trace = 1;
+static bool libcAcc;
 
 static ADDRINT libcLow;
 static ADDRINT libcHigh;
 static ADDRINT execLow;
 static ADDRINT execHigh;
-static ADDRINT mainLow;
-static ADDRINT mainHigh;
 
 static LinkStack* lstack;
 static LinkStack* symbols;
@@ -39,7 +38,9 @@ INT32 Usage() {
 
 /* ===================================================================== */
 VOID ImageLoad(IMG img, VOID *v) {
-	if(IMG_Name(img).compare(LIBC) == 0) {
+	cerr << "Loading " << IMG_Name(img) << ", Image id = " << IMG_Id(img) << endl;
+	if(IMG_Name(img).find(LIBC) != string::npos) {
+		libcAcc = 1;
 		libcLow = IMG_LowAddress(img);
 		libcHigh = IMG_HighAddress(img);
 		if(DEBUG) cerr << "libc loaded: 0x" << hex << libcLow << " - 0x" << libcHigh << endl;
@@ -50,17 +51,12 @@ VOID ImageLoad(IMG img, VOID *v) {
 				// cerr << hex << "0x" << SYM_Address(sym) << endl;
 			}
 		}
-		if(DEBUG) STK_Show2(symbols_libc);
+		// if(DEBUG) STK_Show2(symbols_libc);
 	}
 	if(IMG_IsMainExecutable(img)) {
 		execLow = IMG_LowAddress(img);
 		execHigh = IMG_HighAddress(img);
 		if(DEBUG) cerr << "text section: 0x" << hex << execLow << " - 0x" << execHigh << endl;
-
-		// consider the last ins of main the terminal of trace
-		RTN rtn_main = RTN_FindByName(img, "main");
-		mainLow  = RTN_Address(rtn_main);
-		mainHigh = mainLow + RTN_Size(rtn_main) - 1 ;
 
 		// Forward pass over all symbols in an image
 		for( SYM sym= IMG_RegsymHead(img); SYM_Valid(sym); sym = SYM_Next(sym) ){
@@ -70,9 +66,14 @@ VOID ImageLoad(IMG img, VOID *v) {
 				// cerr << hex << "0x" << SYM_Address(sym) << endl;				
 			}
 		}
-		if(DEBUG) STK_Show2(symbols);
+		// if(DEBUG) STK_Show2(symbols);
 	}
 }
+
+VOID ImageUnload(IMG img, VOID *v) {
+    cerr << "Unloading " << IMG_Name(img) << endl;
+}
+
 /* ===================================================================== */
 
 // count the number of call ins
@@ -80,7 +81,7 @@ VOID c_counter(ADDRINT ip, ADDRINT target, ADDRINT next){
 	//if ins is call and it's next address is in below range (ignore other unrelated place), count it.
 	if(next < execHigh && next > execLow){
 		if(STK_Search(symbols, target)){
-			if(target < libcHigh && target > libcLow){
+			if(libcAcc && target < libcHigh && target > libcLow){
 				return ; // do not trace call inside of function@libc
 			}
 			c_count++;
@@ -104,15 +105,13 @@ VOID c_counter(ADDRINT ip, ADDRINT target, ADDRINT next){
 		// 	// need another method to defend got overwrite attack(JOP??)
 		// }
 	}
-	if(next < libcHigh && next > libcLow){
+	if(libcAcc && next < libcHigh && next > libcLow){
 		c_count++;
 	}
 }
 
 // count the number of ret ins
 VOID r_counter(ADDRINT ip, ADDRINT target){
-	//if ins is ret and it would return in below range of address (ignore other unrelated place), count it.
-	// if((target < execHigh && target > execLow) || (target < libcHigh && target > libcLow)){
 	if((target < execHigh && target > execLow)){
 		r_count++;
 		if(STK_DECT){
@@ -130,14 +129,14 @@ VOID r_counter(ADDRINT ip, ADDRINT target){
 			cerr << "ret[" << std::dec << r_count  << "] to 0x" << hex << target << " @ 0x"<< std::hex << ip << endl;
 		}
 	}
-	if(target < libcHigh && target > libcLow){
+	if(libcAcc && target < libcHigh && target > libcLow){
 		r_count++;
 	}
 }
 
 // count the number of branch ins
 VOID b_check(ADDRINT ip, ADDRINT target){
-	if(STK_Search(symbols, ip) && JOP_DECT){
+	if(STK_Search(symbols, ip) && JOP_DECT && libcAcc){
 		cerr << hex << "jmp @ 0x" << ip << " to 0x" << target << endl;
 		// got can be modified only 1 time
 		if(target < execHigh && target > execLow){
@@ -148,7 +147,7 @@ VOID b_check(ADDRINT ip, ADDRINT target){
 			string b = STK_QueryNameByAddr(symbols, ip);
 			cerr << "a: " << a << " | b: " << b << endl;
 			if( b == a+"@plt"){
-				// cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!yes" << endl;
+				// compare symbols name 
 			}
 			else{
 				cerr << "[JOP] got overwrite dect!!!!!" << endl;
@@ -158,62 +157,35 @@ VOID b_check(ADDRINT ip, ADDRINT target){
 	//if ins is ret and it would return in below range of address (ignore other unrelated place), count it.
 }
 
-// consider ins calling main the begining of trace
-// VOID start_trace(ADDRINT ip, ADDRINT target, ADDRINT next){
-// 	if (target == mainLow){
-// 		trace = 1;
-// 		c_counter(ip, target, next);
-// 	}
-// }
-
 INT32 check(INS ins){
 	return(INS_IsRet(ins) | INS_IsCall(ins) << 1 | INS_IsBranch(ins) << 2);
 }
 
 VOID Instruction(INS ins, VOID *v) {
 	int flag = check(ins);
-	// ADDRINT ip = INS_Address(ins);
-	// if(trace == 0 && flag){
-	// 	INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)start_trace, 
-	// 		IARG_INST_PTR, 
-	// 		IARG_BRANCH_TARGET_ADDR, 
-	// 		IARG_ADDRINT, INS_NextAddress(ins),
-	// 		IARG_END);
-	// }
-	// if (trace == 1){
-		if(flag & CALL){
-			INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)c_counter, 
-				IARG_INST_PTR, 
-				IARG_BRANCH_TARGET_ADDR, 
-				IARG_ADDRINT, INS_NextAddress(ins),
-				IARG_END);
-		}
-		if(flag & RET){
-			INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)r_counter, 
-				IARG_INST_PTR, 
-				IARG_BRANCH_TARGET_ADDR, 
-				IARG_END);
-		}
-		if(flag & BRANCH){
-			INS_InsertCall(ins, IPOINT_TAKEN_BRANCH, (AFUNPTR)b_check, 
-				IARG_INST_PTR, 
-				IARG_BRANCH_TARGET_ADDR, 
-				IARG_END);
-		}
-	// }
-	// if (ip == mainHigh){
-	// 	trace = -1;
-	// }
-	// xop attack detector
-	// if(STK_IsEmpty(lstack) && trace == 1){
-	if( CRB_DECT && r_count > c_count ){
+	if(flag & CALL){
+		INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)c_counter, 
+			IARG_INST_PTR, 
+			IARG_BRANCH_TARGET_ADDR, 
+			IARG_ADDRINT, INS_NextAddress(ins),
+			IARG_END);
+	}
+	if(flag & RET){
+		INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)r_counter, 
+			IARG_INST_PTR, 
+			IARG_BRANCH_TARGET_ADDR, 
+			IARG_END);
+	}
+	if(flag & BRANCH){
+		INS_InsertCall(ins, IPOINT_TAKEN_BRANCH, (AFUNPTR)b_check, 
+			IARG_INST_PTR, 
+			IARG_BRANCH_TARGET_ADDR, 
+			IARG_END);
+	}
+	if( libcAcc && CRB_DECT && r_count > c_count ){
 		cerr << "[CRB] WARNNING!!!" << endl;
 		// exit(0);
 	}
-
-	// if(xxx jop? ){
-	// 	INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)xxxx, IARG_END);
-	// }
 }
 
 /* ===================================================================== */
@@ -243,11 +215,17 @@ int main(int argc, char *argv[]) {
 		return Usage();
 	}
 
+	// Register ImageLoad to be called when an image is loaded
+	printf("done\n");
 	IMG_AddInstrumentFunction(ImageLoad, 0);
-	// RTN_AddInstrumentFunction(Routine, 0);
+
+	// Register ImageUnload to be called when an image is unloaded
+    IMG_AddUnloadFunction(ImageUnload, 0);
+
 	INS_AddInstrumentFunction(Instruction, 0);
 
 	PIN_AddFiniFunction(Fini, 0);
+    
 
     cerr <<  "===============================================" << endl;
     cerr <<  " This application is instrumented by MyPinTool" << endl;
@@ -265,14 +243,17 @@ int main(int argc, char *argv[]) {
 // pin rop fram
 // - ins dect pos 
 // - method 
-// 1.addr cmp
-// 2.ins count
-// 3.gadget length
+// 1.addr cmp 
+// 2.ins count 
+// 3.gadget length ?
+// 4.got protect
+
 // handel
 // ROP JOP return-into-libc
 
 // shadowstack cannot handle jop
-// what to do when pin has vulnerability?
+// what to do when pin has vulnerability? protect got
 
 // trace point set? 
 // some func(e.g. printf) in libc do not obey call-ret balance 
+// it still difficult to deal with by shadow stack... because of setjmp etc

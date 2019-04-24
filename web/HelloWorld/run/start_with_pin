@@ -1,0 +1,8 @@
+#!/bin/sh
+#socat tcp-l:1101,fork exec:'pin -t ./obj-intel64/MyPinTool.so -- ./demo'
+#socat tcp-l:1234,fork exec:'pin -t ./obj-intel64/MyPinTool.so -- ./002'
+# socat tcp-l:1234,fork exec:'pin -t ./obj-intel64/MyPinTool.so -- ./main'
+#socat tcp-l:1234,fork exec:'pin -t ./obj-intel64/MyPinTool.so -- ./got'
+socat tcp-l:1234,fork exec:'pin -t ./obj-intel64/MyPinTool.so -- ./ret2libc' 2> /tmp/outfile
+#socat tcp-l:1234,fork exec:'pin -t ./obj-ia32/MyPinTool.so -- ./demo5'
+

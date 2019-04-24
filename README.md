@@ -100,8 +100,8 @@ xxx:
  ```
 
 ### ouput of call-ret detector
-![output](./detector_1.png)
-![output](./detector_2_cop.png)
+![output](./pic/detector_1.png)
+![output](./pic/detector_2_cop.png)
  - see more -> outFile_attack 
 
 ### What's more: Method to protect from attack

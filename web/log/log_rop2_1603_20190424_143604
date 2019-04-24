@@ -1,0 +1,58 @@
+===============================================
+ This application is instrumented by MyPinTool
+===============================================
+===============================================
+                MyPinTool done.                
+===============================================
+===============================================
+ This application is instrumented by MyPinTool
+===============================================
+[CRB] balance break! Count of RET is 1 more than CALL !!!
+[CRB] balance break! Count of RET is 1 more than CALL !!!
+[attack] ROP attack detected!!! gadget addr: 0x7f45ac97a6be
+[CRB] balance break! Count of RET is 2 more than CALL !!!
+[CRB] balance break! Count of RET is 2 more than CALL !!!
+[CRB] balance break! Count of RET is 2 more than CALL !!!
+[CRB] balance break! Count of RET is 2 more than CALL !!!
+[attack] Ret2libc attack detected!!! call execve addr: 0x7f45ac925e30
+[CRB] balance break! Count of RET is 1 more than CALL !!!
+[CRB] balance break! Count of RET is 1 more than CALL !!!
+===============================================
+ This application is instrumented by MyPinTool
+===============================================
+[CRB] balance break! Count of RET is 1 more than CALL !!!
+[CRB] balance break! Count of RET is 1 more than CALL !!!
+[attack] ROP attack detected!!! gadget addr: 0x7fdad831d6be
+[CRB] balance break! Count of RET is 2 more than CALL !!!
+[CRB] balance break! Count of RET is 2 more than CALL !!!
+[CRB] balance break! Count of RET is 2 more than CALL !!!
+[CRB] balance break! Count of RET is 2 more than CALL !!!
+[attack] Ret2libc attack detected!!! call execve addr: 0x7fdad82c8e30
+[CRB] balance break! Count of RET is 1 more than CALL !!!
+[CRB] balance break! Count of RET is 1 more than CALL !!!
+===============================================
+ This application is instrumented by MyPinTool
+===============================================
+[CRB] balance break! Count of RET is 1 more than CALL !!!
+[CRB] balance break! Count of RET is 1 more than CALL !!!
+[attack] ROP attack detected!!! gadget addr: 0x7f6a90eb56be
+[CRB] balance break! Count of RET is 2 more than CALL !!!
+[CRB] balance break! Count of RET is 2 more than CALL !!!
+[CRB] balance break! Count of RET is 2 more than CALL !!!
+[CRB] balance break! Count of RET is 2 more than CALL !!!
+[attack] Ret2libc attack detected!!! call execve addr: 0x7f6a90e60e30
+[CRB] balance break! Count of RET is 1 more than CALL !!!
+[CRB] balance break! Count of RET is 1 more than CALL !!!
+===============================================
+ This application is instrumented by MyPinTool
+===============================================
+[CRB] balance break! Count of RET is 1 more than CALL !!!
+[CRB] balance break! Count of RET is 1 more than CALL !!!
+[attack] ROP attack detected!!! gadget addr: 0x7f01f37b46be
+[CRB] balance break! Count of RET is 2 more than CALL !!!
+[CRB] balance break! Count of RET is 2 more than CALL !!!
+[CRB] balance break! Count of RET is 2 more than CALL !!!
+[CRB] balance break! Count of RET is 2 more than CALL !!!
+[attack] Ret2libc attack detected!!! call execve addr: 0x7f01f375fe30
+[CRB] balance break! Count of RET is 1 more than CALL !!!
+[CRB] balance break! Count of RET is 1 more than CALL !!!

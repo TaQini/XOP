@@ -1,0 +1,67 @@
+===============================================
+ This application is instrumented by MyPinTool
+===============================================
+2019/04/24 12:13:15 socat[15697] E waitpid(): child 15698 exited on signal 11
+===============================================
+ This application is instrumented by MyPinTool
+===============================================
+2019/04/24 12:13:21 socat[15703] E waitpid(): child 15704 exited on signal 11
+===============================================
+ This application is instrumented by MyPinTool
+===============================================
+[attack] JOP attack detected!!! gadget addr: 0x7f6dc74f0440
+[attack] Ret2libc attack detected!!! call sigaction addr: 0x7f6dc74e0110
+[attack] ROP attack detected!!! gadget addr: 0x7f6dc74eff63
+[attack] Ret2libc attack detected!!! call sigaction addr: 0x7f6dc74e0110
+[attack] ROP attack detected!!! gadget addr: 0x7f6dc74eff7f
+[attack] Ret2libc attack detected!!! call sigprocmask addr: 0x7f6dc74e0140
+[attack] ROP attack detected!!! gadget addr: 0x7f6dc74effdc
+[attack] Ret2libc attack detected!!! call waitpid addr: 0x7f6dc7585670
+[attack] Ret2libc attack detected!!! call sigaction addr: 0x7f6dc74e0110
+[attack] ROP attack detected!!! gadget addr: 0x7f6dc74f0300
+[attack] Ret2libc attack detected!!! call sigaction addr: 0x7f6dc74e0110
+[attack] ROP attack detected!!! gadget addr: 0x7f6dc74f0313
+[attack] Ret2libc attack detected!!! call sigprocmask addr: 0x7f6dc74e0140
+[attack] ROP attack detected!!! gadget addr: 0x7f6dc74f0322
+[attack] Ret2libc attack detected!!! call execve addr: 0x7f6dc7585e30
+[attack] ROP attack detected!!! gadget addr: 0x7f6dc74f0067
+[attack] Ret2libc attack detected!!! call sigaction addr: 0x7f6dc74e0110
+[attack] ROP attack detected!!! gadget addr: 0x7f6dc74f00fc
+[attack] Ret2libc attack detected!!! call sigaction addr: 0x7f6dc74e0110
+[attack] ROP attack detected!!! gadget addr: 0x7f6dc74f0111
+[attack] Ret2libc attack detected!!! call sigprocmask addr: 0x7f6dc74e0140
+[attack] ROP attack detected!!! gadget addr: 0x7f6dc74f018f
+[attack] ROP attack detected!!! gadget addr: 0x400689
+[attack] ROP attack detected!!! gadget addr: 0x7f6dc74c2b97
+[attack] Ret2libc attack detected!!! call exit addr: 0x7f6dc74e4120
+[attack] COP attack detected!!! gadget addr: 0x7f6dc74e3ed0
+[attack] Ret2libc attack detected!!! call __call_tls_dtors addr: 0x7f6dc74e4870
+[attack] ROP attack detected!!! gadget addr: 0x7f6dc74e4117
+[attack] COP attack detected!!! gadget addr: 0x7f6ddae639a0
+[attack] COP attack detected!!! gadget addr: 0x7f6ddae540e0
+[attack] ROP attack detected!!! gadget addr: 0x7f6ddae63a0f
+[attack] COP attack detected!!! gadget addr: 0x7f6ddae6ac80
+[attack] COP attack detected!!! gadget addr: 0x7f6ddae72a20
+[attack] ROP attack detected!!! gadget addr: 0x7f6ddae6acf1
+[attack] COP attack detected!!! gadget addr: 0x7f6ddae72a20
+[attack] ROP attack detected!!! gadget addr: 0x7f6ddae6ae5b
+[attack] COP attack detected!!! gadget addr: 0x7f6ddae72a20
+[attack] ROP attack detected!!! gadget addr: 0x7f6ddae6ae5b
+[attack] ROP attack detected!!! gadget addr: 0x7f6ddae63ad9
+[attack] COP attack detected!!! gadget addr: 0x7f6ddae540f0
+[attack] ROP attack detected!!! gadget addr: 0x7f6ddae63ae6
+[attack] COP attack detected!!! gadget addr: 0x4005f0
+[attack] COP attack detected!!! gadget addr: 0x400580
+[attack] ROP attack detected!!! gadget addr: 0x400602
+[attack] ROP attack detected!!! gadget addr: 0x7f6ddae63b73
+[attack] COP attack detected!!! gadget addr: 0x400724
+[attack] ROP attack detected!!! gadget addr: 0x7f6ddae63b93
+[attack] ROP attack detected!!! gadget addr: 0x7f6dc74e4041
+[attack] COP attack detected!!! gadget addr: 0x7f6dc75303e0
+[attack] COP attack detected!!! gadget addr: 0x7f6dc75300e0
+[attack] ROP attack detected!!! gadget addr: 0x7f6dc7530405
+[attack] ROP attack detected!!! gadget addr: 0x7f6dc74e4102
+[attack] Ret2libc attack detected!!! call _exit addr: 0x7f6dc7585dd0
+===============================================
+                MyPinTool done.                
+===============================================

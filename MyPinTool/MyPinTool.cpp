@@ -13,11 +13,12 @@
 #define STK_DECT 1
 #define CRB_DECT 1
 #define JOP_DECT 1
-#define DEBUG 1
+#define DEBUG 0
 
 static int c_count = 0;
 static int r_count = 0;
 static bool libcAcc;
+static bool beAttacked = 0;
 
 static ADDRINT libcLow;
 static ADDRINT libcHigh;
@@ -29,16 +30,35 @@ static LinkStack* symbols;
 static LinkStack* symbols_libc;
 
 /* ===================================================================== */
-
 INT32 Usage() {
 	cerr << "This tool detects ROP attacks.\n"; 
 	cerr << endl;
 	return -1;
 }
+/* ===================================================================== */
+string time(){
+	struct tm nowtime;
+	struct timeval tv;
+	char time_now[128];
+	gettimeofday(&tv, NULL);
+	localtime_r(&tv.tv_sec,&nowtime);
 
+	sprintf(time_now,"%d-%d-%d %d:%d:%d.%03d ",
+		nowtime.tm_year+1900,
+		nowtime.tm_mon+1,
+		nowtime.tm_mday,
+		nowtime.tm_hour,
+		nowtime.tm_min,
+		nowtime.tm_sec,
+		(int)(tv.tv_usec/1000)
+	);
+	return (string)time_now;
+}
 /* ===================================================================== */
 VOID ImageLoad(IMG img, VOID *v) {
-	cerr << "Loading " << IMG_Name(img) << ", Image id = " << IMG_Id(img) << endl;
+	if(DEBUG){
+		cerr << "Loading " << IMG_Name(img) << ", Image id = " << IMG_Id(img) << endl;
+	}
 	if(IMG_Name(img).find(LIBC) != string::npos) {
 		libcAcc = 1;
 		libcLow = IMG_LowAddress(img);
@@ -71,7 +91,9 @@ VOID ImageLoad(IMG img, VOID *v) {
 }
 
 VOID ImageUnload(IMG img, VOID *v) {
-    cerr << "Unloading " << IMG_Name(img) << endl;
+    if(DEBUG){
+    	cerr << "Unloading " << IMG_Name(img) << endl;
+    }
 }
 
 /* ===================================================================== */
@@ -98,15 +120,18 @@ VOID c_counter(ADDRINT ip, ADDRINT target, ADDRINT next){
 				cerr << "next: 0x" << std::hex << next << endl;
 			}
 		}
-		// else if(COP_DECT){ // attacker call func@libc directly from text section is disable, but overwrite got is able. 
-		// 	cerr << "[COP] attack detected !!!";
-		// 	cerr << "call for 0x" << target << " is invaild!!!" << endl;
-		// 	// exit(0);
-		// 	// need another method to defend got overwrite attack(JOP??)
-		// }
 	}
 	if(libcAcc && next < libcHigh && next > libcLow){
 		c_count++;
+	}
+	if(beAttacked){
+		if (STK_Search(symbols_libc, target)){
+			string func = STK_QueryNameByAddr(symbols_libc, target);
+			cerr << "[attack] Ret2libc attack detected! call " << func;
+			cerr << " addr: 0x" << std::hex << target << endl;
+		}else{
+			cerr << "[attack] COP attack detected! gadget addr: 0x" << std::hex << target << endl;
+		}
 	}
 }
 
@@ -121,7 +146,8 @@ VOID r_counter(ADDRINT ip, ADDRINT target){
 				cerr << "Poped: 0x" << std::hex << ret << endl;
 			}
 			if(ret != target){
-				cerr << "[STK] Gadget Found!!! addr: 0x" << std::hex << target << endl;
+				beAttacked = 1;
+				// cerr << "[STK] Gadget Found! addr: 0x" << std::hex << target << endl;
 				// exit(0);
 			}
 		}
@@ -132,12 +158,23 @@ VOID r_counter(ADDRINT ip, ADDRINT target){
 	if(libcAcc && target < libcHigh && target > libcLow){
 		r_count++;
 	}
+	if(beAttacked){
+		if (STK_Search(symbols_libc, target)){
+			string func = STK_QueryNameByAddr(symbols_libc, target);
+			cerr << "[attack] Return-into-libc attack detected! call " << func;
+			cerr << " addr: 0x" << std::hex << target << endl;
+		}else{
+			cerr << "[attack] ROP attack detected! gadget addr: 0x" << std::hex << target << endl;
+		}
+	}
 }
 
 // count the number of branch ins
 VOID b_check(ADDRINT ip, ADDRINT target){
 	if(STK_Search(symbols, ip) && JOP_DECT && libcAcc){
-		cerr << hex << "jmp @ 0x" << ip << " to 0x" << target << endl;
+		if(DEBUG){
+			cerr << hex << "jmp @ 0x" << ip << " to 0x" << target << endl;
+		}
 		// got can be modified only 1 time
 		if(target < execHigh && target > execLow){
 			// cerr << "branch @ 0x" << hex << ip << " -> 0x" << next << endl;
@@ -145,12 +182,16 @@ VOID b_check(ADDRINT ip, ADDRINT target){
 		else{
 			string a = STK_QueryNameByAddr(symbols_libc, target);
 			string b = STK_QueryNameByAddr(symbols, ip);
-			cerr << "a: " << a << " | b: " << b << endl;
+			if(DEBUG) {
+				cerr << "a: " << a << " | b: " << b << endl;
+			}
 			if( b == a+"@plt"){
 				// compare symbols name 
 			}
 			else{
-				cerr << "[JOP] got overwrite dect!!!!!" << endl;
+				beAttacked = 1;
+				// cerr << "[JOP] got overwrite dect!!!" << endl;
+				cerr << "[attack] JOP attack detected! gadget addr: 0x" << std::hex << target << endl;
 			}
 		}
 	}
@@ -182,8 +223,9 @@ VOID Instruction(INS ins, VOID *v) {
 			IARG_BRANCH_TARGET_ADDR, 
 			IARG_END);
 	}
-	if( libcAcc && CRB_DECT && r_count > c_count ){
-		cerr << "[CRB] WARNNING!!!" << endl;
+	if( libcAcc && CRB_DECT && r_count - c_count > 0){
+		beAttacked = 1;
+		cerr << "[CRB] balance break! Count of RET is " << dec << r_count-c_count << " more than CALL !"<< endl;
 		// exit(0);
 	}
 }
@@ -192,7 +234,7 @@ VOID Instruction(INS ins, VOID *v) {
 
 VOID Fini(INT32 code, VOID *v) {
     cerr <<  "===============================================" << endl;
-    cerr <<  "MyPinTool done." << endl;
+    cerr <<  "                MyPinTool done.                " << endl;
     cerr <<  "===============================================" << endl;
 }
 
@@ -216,7 +258,6 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Register ImageLoad to be called when an image is loaded
-	printf("done\n");
 	IMG_AddInstrumentFunction(ImageLoad, 0);
 
 	// Register ImageUnload to be called when an image is unloaded
@@ -228,6 +269,7 @@ int main(int argc, char *argv[]) {
     
 
     cerr <<  "===============================================" << endl;
+    cerr <<  "   current time : " << time() << "  "  << endl;
     cerr <<  " This application is instrumented by MyPinTool" << endl;
     cerr <<  "===============================================" << endl;
 

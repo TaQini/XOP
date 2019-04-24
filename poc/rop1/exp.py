@@ -16,8 +16,8 @@ if len(sys.argv)>1:
 p = remote(addr,port)
 
 # get info from ELF
-elf = ELF('/home/taqini/Desktop/XOP/demo/demo1/demo')
-libc = ELF('/home/taqini/Desktop/XOP/demo/libc.so.6')
+elf = ELF('./demo')
+libc = ELF('../libc.so.6')
 # libc = ELF('ubuntu')
 # infomation
 bss = elf.symbols['__bss_start']

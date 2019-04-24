@@ -1,0 +1,6 @@
+===============================================
+   current time : 2019-4-24 15:17:36.367   
+ This application is instrumented by MyPinTool
+===============================================
+[attack] ROP attack detected! gadget addr: 0x4006f3
+[attack] Return-into-libc attack detected! call execve addr: 0x7f527152be30

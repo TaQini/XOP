@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>ROP攻击防御检测效果展示</title>
+<script type="text/javascript">
+function checkOrCancelAll() {
+    var chElt=document.getElementById("chElt");
+    var checkedElt = chElt.checked;
+    var allCheck = document.getElementsByName("defend");
+    if(checkedElt) {
+        for(var i=0;i<allCheck.length;i++) {
+            allCheck[i].checked=true;
+        }
+    }
+    else {
+        for(var i=0;i<allCheck.length;i++) {
+            allCheck[i].checked=false;
+        }
+    }
+}
+function readLog(argument) {
+	var log = document.getElementById("logFile").value;
+	alert(log);
+
+	var reader = new FileReader();
+	reader.readAsText(log);
+    
+    reader.onload = function(){
+        var text = reader.result;
+    }
+
+	alert(text);
+	document.getElementById("text").innerHTML = text
+}
+
+</script>
+<h1>
+    ROP攻击防御检测效果展示
+</h1>
+</head>
+<body>
+    <form action="/index" method="post">
+        {% csrf_token %}
+        <table border="0">
+            <td>    
+                <span>选择攻击类型:</span>
+                <br/>
+                <input type="radio" name="attack" value="ret2libc" checked="checked" >
+                <span id="ret2libc">ret2libc</span>
+                <br/>
+                <input type="radio" name="attack" value="rop1">
+                <span id="rop1">rop</span>
+                <br/>
+                <input type="radio" name="attack" value="rop2">
+                <span id="rop1">rop(libc gadget)　　　　</span>
+                <br/>
+                <input type="radio" name="attack" value="jop">
+                <span id="jop">jop</span>
+                <br/>
+            </td>
+            <td>
+                <span>选择防御方案:</span>
+                <br/>
+                <input type="checkbox" name="defend" value="ss" checked="checked">
+                <span id="shadowstack">shadowstack</span>
+                <br/>
+                <input type="checkbox" name="defend" value="got">
+                <span id="gotcheck">got check</span>
+                <br/>
+                <input type="checkbox" name="defend" value="crb">
+                <span id="crbalance">call-ret balance</span>
+                <br/>
+                <input type="checkbox" id="chElt" onclick="checkOrCancelAll();"/>
+                <span id="mySpan">select all</span>
+                <br/>
+            </td>
+        </table>
+        <br/ >
+        <input type="submit" value="start">
+    </form>
+    <br/>
+
+    <code>
+	    <table style="background: transparent; border-color: blue" border="2" cellpadding="10">
+	    	<tr>
+	    		<th>攻击类型</th>
+	    		<th>影子栈</th>
+	    		<th>GOT表检测</th>
+	    		<th>指令平衡</th>
+	    		<th>服务端口</th>
+	    	</tr>
+			<tr>
+	    		<td>{{attack}}</td>
+	    		<td>{{ss}}</td>
+	    		<td>{{got}}</td>
+	    		<td>{{crb}}</td>
+	    		<td>{{port}}</td>
+	    	</tr>
+	    </table>
+	</code>
+
+	<br/>
+    <input style="background: transparent; border-color: blue" value=" service start at 127.0.0.1:{{ port }}">
+	<br/>
+	<br/>
+
+    <input style="background: transparent; border-color: blue" value=" $ nc 127.0.0.1 {{ port }}">
+
+    <form action="/result", method="post">
+        {% csrf_token %}
+	    <input type="hidden" id="logFile" value="{{ log }}" />
+		<br/> <br/>查看防御结果： 
+        <input type="submit" value="result">
+        <br/>
+	    <!-- <input type="button" value="check" id="show" onclick="readLog();"/> -->
+		<textarea readonly rows="100" cols="80" id="text">{{ text }}</textarea>
+    </form>
+
+</body>
+</html>

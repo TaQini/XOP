@@ -1,0 +1,56 @@
+===============================================
+   current time : 2019-4-24 15:18:38.432   
+ This application is instrumented by MyPinTool
+===============================================
+[attack] ROP attack detected! gadget addr: 0x40062a
+[attack] ROP attack detected! gadget addr: 0x400610
+[attack] Ret2libc attack detected! call write addr: 0x7f4ef88c2140
+[attack] ROP attack detected! gadget addr: 0x40061d
+[attack] ROP attack detected! gadget addr: 0x40059d
+[CRB] balance break! Count of RET is 1 more than CALL !
+[CRB] balance break! Count of RET is 1 more than CALL !
+[CRB] balance break! Count of RET is 1 more than CALL !
+[CRB] balance break! Count of RET is 1 more than CALL !
+[CRB] balance break! Count of RET is 1 more than CALL !
+[CRB] balance break! Count of RET is 1 more than CALL !
+[CRB] balance break! Count of RET is 1 more than CALL !
+[CRB] balance break! Count of RET is 1 more than CALL !
+[CRB] balance break! Count of RET is 1 more than CALL !
+[attack] COP attack detected! gadget addr: 0x400450
+[attack] ROP attack detected! gadget addr: 0x4005c0
+[attack] COP attack detected! gadget addr: 0x40057d
+[attack] COP attack detected! gadget addr: 0x400460
+[attack] ROP attack detected! gadget addr: 0x40059b
+[attack] ROP attack detected! gadget addr: 0x40062a
+[attack] ROP attack detected! gadget addr: 0x400610
+[attack] Ret2libc attack detected! call read addr: 0x7f4ef88c2070
+[attack] ROP attack detected! gadget addr: 0x40061d
+[attack] ROP attack detected! gadget addr: 0x40059d
+[attack] COP attack detected! gadget addr: 0x400450
+[attack] ROP attack detected! gadget addr: 0x4005c0
+[attack] COP attack detected! gadget addr: 0x40057d
+[attack] COP attack detected! gadget addr: 0x400460
+[attack] ROP attack detected! gadget addr: 0x40059b
+[attack] ROP attack detected! gadget addr: 0x40062a
+[attack] ROP attack detected! gadget addr: 0x400610
+[attack] Ret2libc attack detected! call write addr: 0x7f4ef88c2140
+[attack] ROP attack detected! gadget addr: 0x40061d
+[attack] ROP attack detected! gadget addr: 0x40059d
+[attack] COP attack detected! gadget addr: 0x400450
+[attack] ROP attack detected! gadget addr: 0x4005c0
+[attack] COP attack detected! gadget addr: 0x40057d
+[attack] COP attack detected! gadget addr: 0x400460
+[attack] ROP attack detected! gadget addr: 0x40059b
+[attack] ROP attack detected! gadget addr: 0x40062a
+[attack] ROP attack detected! gadget addr: 0x400610
+[attack] Ret2libc attack detected! call execve addr: 0x7f4ef8896e30
+[CRB] balance break! Count of RET is 8 more than CALL !
+[CRB] balance break! Count of RET is 8 more than CALL !
+===============================================
+   current time : 2019-4-24 15:21:8.524   
+ This application is instrumented by MyPinTool
+===============================================
+===============================================
+                MyPinTool done.                
+===============================================
+2019/04/24 15:21:10 socat[19138] E waitpid(): child 19139 exited with status 8

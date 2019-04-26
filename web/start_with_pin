@@ -1,2 +1,2 @@
 #!/bin/sh
-socat tcp-l:$1,fork exec:"pin -t /home/taqini/Desktop/pin/source/tools/MyPinTool/obj-intel64/MyPinTool.so -- ./elf/$2" 2> $3
+socat tcp-l:$1,fork exec:"pin -t ./MyPinTool/obj-intel64/$4 -- ./elf/$2" 2> $3

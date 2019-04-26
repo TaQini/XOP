@@ -1,8 +1,0 @@
-===============================================
- This application is instrumented by MyPinTool
-===============================================
-[attack] ROP attack detected!!! gadget addr: 0x4006f3
-===============================================
-                MyPinTool done.                
-===============================================
-2019/04/24 14:24:56 socat[16679] E waitpid(): child 16680 exited on signal 7

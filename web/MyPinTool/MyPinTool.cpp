@@ -11,8 +11,8 @@
 #define BRANCH 4
 
 #define STK_DECT 1
-#define CRB_DECT 1
 #define JOP_DECT 1
+#define CRB_DECT 1
 #define DEBUG 0
 
 static int c_count = 0;

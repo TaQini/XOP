@@ -31,22 +31,22 @@ def index(request):
         attack = request.POST.get('attack',None)
         defend = request.POST.getlist('defend',None)
         port = atbl[attack]
-		defend_flag = ['_','_','_']
+        defend_flag = ['_','_','_']
         for i in defend:
             port += dtbl[i]
             ctx[i] = '√'
-			defend_flag[dtbl.key().index(i)] = i[0]
-		defend_file = ''
-		for i in defend_flag:
-			defend_file += i
+            defend_flag[list(dtbl.keys()).index(i)] = i[0]
+        defend_file = ''
+        for i in defend_flag:
+            defend_file += i
         ctx['attack'] = attack
         ctx['port'] = str(port)
         now = int(time())
         stamp = strftime('%Y%m%d_%H%M%S',localtime(now))
-        logfile = './log/log_'+attack+'('+defend_file+')'+str(port)+'_'+stamp
+        logfile = './log/log_'+attack+'_'+defend_file+'_'+str(port)+'_'+stamp
         ctx['log'] = logfile
         cmd = './start_with_pin ' + str(port) +' ./'+ attack + ' '+ logfile + ' ' + defend_file + '.so &'
-		system(cmd)
+        system(cmd)
     return render(request, "post.html", ctx)
 
 def result(request):

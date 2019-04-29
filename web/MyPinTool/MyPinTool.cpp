@@ -10,15 +10,27 @@
 #define CALL 2
 #define BRANCH 4
 
-#define STK_DECT 1
-#define JOP_DECT 1
-#define CRB_DECT 1
+#define G_SIZE 7
+#define S_LENGTH 5
+
+#define STK_DECT 0
+#define JOP_DECT 0
+#define CRB_DECT 0
+#define THR_DECT 1
+
 #define DEBUG 0
 
 static int c_count = 0;
 static int r_count = 0;
+
+static int g_count = 0;
+static int s_count = 0;
+
 static bool libcAcc;
+static bool execAcc;
 static bool beAttacked = 0;
+
+static ADDRINT addresses[S_LENGTH+10];
 
 static ADDRINT libcLow;
 static ADDRINT libcHigh;
@@ -74,6 +86,7 @@ VOID ImageLoad(IMG img, VOID *v) {
 		// if(DEBUG) STK_Show2(symbols_libc);
 	}
 	if(IMG_IsMainExecutable(img)) {
+		execAcc = 1;
 		execLow = IMG_LowAddress(img);
 		execHigh = IMG_HighAddress(img);
 		if(DEBUG) cerr << "text section: 0x" << hex << execLow << " - 0x" << execHigh << endl;
@@ -97,6 +110,35 @@ VOID ImageUnload(IMG img, VOID *v) {
 }
 
 /* ===================================================================== */
+
+VOID g_counter(){
+    g_count++;
+}
+
+VOID logic(ADDRINT ip){
+	g_counter();
+	// only consider gadget in elf and libc
+	if((ip < execHigh && ip > execLow) || (libcAcc && ip < libcHigh && ip > libcLow)){
+	    addresses[s_count] = ip;
+	    if(g_count > G_SIZE){
+            g_count = 0;
+            s_count = 0;
+	    }//if g_count > glength, no gadget. reset counters.
+	    else{
+	        //if g_count < glength, gadget detected. Reset g_count, increment s_count,
+	        // and check s_count vs slength.
+	        g_count = 0;
+	        s_count ++;
+	        if(s_count >= S_LENGTH){
+				cerr << "Rop detected. Gadget Addresses at: " << endl;
+	            for(int i=1; i <= S_LENGTH; ++i){
+					cerr << hex << "0x" << addresses[i] << ", ";
+				}
+				cerr << endl;
+	        }//if s_count >= slength, ROP detected
+	    }
+	}	
+}
 
 // count the number of call ins
 VOID c_counter(ADDRINT ip, ADDRINT target, ADDRINT next){
@@ -133,6 +175,13 @@ VOID c_counter(ADDRINT ip, ADDRINT target, ADDRINT next){
 			cerr << "[attack] COP attack detected! gadget addr: 0x" << std::hex << target << endl;
 		}
 	}
+	if(THR_DECT){
+		if(STK_Search(symbols_libc, target) || STK_Search(symbols, target)){
+			g_counter();
+		}else{
+			logic(ip);
+		}
+	}
 }
 
 // count the number of ret ins
@@ -167,6 +216,10 @@ VOID r_counter(ADDRINT ip, ADDRINT target){
 			cerr << "[attack] ROP attack detected! gadget addr: 0x" << std::hex << target << endl;
 		}
 	}
+
+	if(THR_DECT){
+		logic(ip);
+	}
 }
 
 // count the number of branch ins
@@ -196,6 +249,10 @@ VOID b_check(ADDRINT ip, ADDRINT target){
 		}
 	}
 	//if ins is ret and it would return in below range of address (ignore other unrelated place), count it.
+	if(THR_DECT){
+		// logic(ip);
+		g_counter();
+	}
 }
 
 INT32 check(INS ins){
@@ -222,10 +279,14 @@ VOID Instruction(INS ins, VOID *v) {
 			IARG_INST_PTR, 
 			IARG_BRANCH_TARGET_ADDR, 
 			IARG_END);
+	}else{
+            INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)g_counter, IARG_BRANCH_TARGET_ADDR, IARG_END);		
 	}
 	if( libcAcc && CRB_DECT && r_count - c_count > 0){
 		beAttacked = 1;
 		cerr << "[CRB] balance break! Count of RET is " << dec << r_count-c_count << " more than CALL !"<< endl;
+	}
+	if(beAttacked){ // defence
 		// exit(0);
 	}
 }

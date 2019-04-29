@@ -10,8 +10,10 @@ import sys
 #addr = '192.168.191.131'
 addr = "127.0.0.1"
 port = 1234
-if len(sys.argv)>1:
-    port = int(sys.argv[1])
+
+if len(sys.argv)>2:
+    addr = sys.argv[1]
+    port = int(sys.argv[2])
 
 p = remote(addr,port)
 

@@ -4,28 +4,32 @@ from django.shortcuts import render
 from django.views.decorators import csrf
 from os import system
 from time import time, localtime, strftime
+from netifaces import ifaddresses
 
 logfile = ''
-ctx = {
-    'attack':'-',
-    'ss':'x',
-    'got':'x',
-    'crb':'x',
-    'port':0,
-}
+host = ifaddresses('wlp1s0')[2][0]['addr']
+
 def index(request):
     global logfile
     global ctx
+    ctx = {
+        'attack':'-',
+        'ss':'x',
+        'got':'x',
+        'crb':'x',
+        'host':host,
+        'port':0,
+    }
     atbl = {
-        'ret2libc':1001,
-        'rop1':1002,
-        'rop2':1003,
-        'jop':1004,
+        'ret2libc':1101,
+        'rop1':1102,
+        'rop2':1103,
+        'jop':1104,
     }
     dtbl = {
         'ss':100,
         'got':200,
-        'crb':300,
+        'crb':400,
     }
     if request.POST:
         attack = request.POST.get('attack',None)
@@ -47,6 +51,7 @@ def index(request):
         ctx['log'] = logfile
         cmd = './start_with_pin ' + str(port) +' ./'+ attack + ' '+ logfile + ' ' + defend_file + '.so &'
         system(cmd)
+        ctx['text'] = ''
     return render(request, "post.html", ctx)
 
 def result(request):

@@ -46,7 +46,7 @@ function readLog(argument) {
             <td>    
                 <span>选择攻击类型:</span>
                 <br/>
-                <input type="radio" name="attack" value="ret2libc" checked="checked" >
+                <input type="radio" name="attack" value="ret2libc" >
                 <span id="ret2libc">ret2libc</span>
                 <br/>
                 <input type="radio" name="attack" value="rop1">
@@ -62,7 +62,7 @@ function readLog(argument) {
             <td>
                 <span>选择防御方案:</span>
                 <br/>
-                <input type="checkbox" name="defend" value="ss" checked="checked">
+                <input type="checkbox" name="defend" value="ss">
                 <span id="shadowstack">shadowstack</span>
                 <br/>
                 <input type="checkbox" name="defend" value="got">
@@ -101,11 +101,11 @@ function readLog(argument) {
 	</code>
 
 	<br/>
-    <input style="background: transparent; border-color: blue" value=" service start at 127.0.0.1:{{ port }}">
+    <input style="background: transparent; border-color: blue" value=" service start at port {{ port }}">
 	<br/>
 	<br/>
 
-    <input style="background: transparent; border-color: blue" value=" $ nc 127.0.0.1 {{ port }}">
+    <input style="background: transparent; border-color: blue" value=" $ nc {{ host }} {{ port }}">
 
     <form action="/result", method="post">
         {% csrf_token %}

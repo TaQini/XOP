@@ -136,3 +136,17 @@ r9 - sixth argument
 1. stk
 2. crb
 3. got cmp
+
+## to-do-list
+1. 合并rop1,rop2为ROP攻击实例，攻击方案分三种
+ - shellcode, 阈值可防(绕过影子栈)
+ - main-gadget, 影子栈可防(绕过阈值)
+ - libc-gadget, 指令平衡可防(绕过影子栈)
+2. 重构jop例子(有空的话)
+ - 应用dispatch
+3. web端加入t法
+ - 需修改search.py post.html
+4. 论文
+ - 目录变更：二三章合并(相关技术PIN\攻击\防御)
+ - ASLR,PIE介绍
+ - 结合展示平台写

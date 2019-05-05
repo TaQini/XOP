@@ -17,25 +17,26 @@ def index(request):
         'ss':'x',
         'got':'x',
         'crb':'x',
+        'thr':'x',
         'host':host,
         'port':0,
     }
     atbl = {
-        'ret2libc':1101,
-        'rop1':1102,
-        'rop2':1103,
-        'jop':1104,
+        'demo1':1101,
+        'demo2':1102,
+        'demo3':1103,
     }
     dtbl = {
         'ss':100,
-        'got':200,
-        'crb':400,
+        'got':50,
+        'crb':200,
+        'thr':400,
     }
     if request.POST:
         attack = request.POST.get('attack',None)
         defend = request.POST.getlist('defend',None)
         port = atbl[attack]
-        defend_flag = ['_','_','_']
+        defend_flag = ['_','_','_','_']
         for i in defend:
             port += dtbl[i]
             ctx[i] = '√'

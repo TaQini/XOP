@@ -1,3 +1,3 @@
 #!/bin/sh
-# socat tcp-l:$1,fork exec:"pin -t ./MyPinTool/obj-intel64/MyPinTool.so -- ./elf/$2" 2> $3
-socat tcp-l:$1,fork exec:"pin -t ./MyPinTool/obj-intel64/exit.so -- ./elf/$2" 2> $3
+socat tcp-l:$1,fork exec:"pin -t ./MyPinTool/obj-intel64/MyPinTool.so -- ./elf/$2" 2> $3
+# socat tcp-l:$1,fork exec:"pin -t ./MyPinTool/obj-intel64/exit.so -- ./elf/$2" 2> $3

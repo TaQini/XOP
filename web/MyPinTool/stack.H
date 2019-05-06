@@ -96,15 +96,3 @@ string STK_QueryNameByAddr(LinkStack *s, ADDRINT addr){
 	}
 	return NULL;
 }
-
-// BOOL STK_Cmp(LinkStack *sa, LinkStack *sb, ADDRINT pa, ADDRINT pb){
-// 	string namea = STK_QueryNameByAddr(sa, pa);
-// 	string nameb = STK_QueryNameByAddr(sb, pb);
-// 	cerr << "namea: " << namea << " | nameb: " << nameb << endl;
-// 	if(namea==nameb){
-// 		return 1;
-// 	}
-// 	else{
-// 		return 0;
-// 	}
-// }

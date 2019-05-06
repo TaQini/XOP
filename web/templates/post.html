@@ -46,14 +46,15 @@ function readLog(argument) {
             <td>    
                 <span>选择程序所含漏洞类型:</span>
                 <br/>
+                <br/>
                 <input type="radio" name="attack" value="demo1" >
                 <span id="demo1">缓冲区溢出(溢出点在子函数)</span>
                 <br/>
                 <input type="radio" name="attack" value="demo2">
-                <span id="demo2">缓冲区溢出(溢出点在main函数)</span>
+                <span id="demo2">缓冲区溢出(溢出点在主函数)</span>
                 <br/>
                 <input type="radio" name="attack" value="demo3">
-                <span id="demo3">无缓冲区溢出(但存在写任意内存漏洞，GOT可被覆写)</span>
+                <span id="demo3">写任意内存漏洞</span>
                 <br/>
             </td>
             <td>
@@ -64,7 +65,6 @@ function readLog(argument) {
                 <br/>
                 <input type="checkbox" name="defend" value="got">
                 <span id="gotcheck">GOT保护</span>
-                <br/>
                 <br/>
                 <input type="checkbox" name="defend" value="crb">
                 <span id="crbalance">call-ret平衡</span>

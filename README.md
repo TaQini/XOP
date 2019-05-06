@@ -150,3 +150,6 @@ r9 - sixth argument
  - 目录变更：二三章合并(相关技术PIN\攻击\防御)
  - ASLR,PIE介绍
  - 结合展示平台写
+
+## B/S interface
+![iface](./pic/bs.png)

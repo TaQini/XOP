@@ -47,30 +47,32 @@ function readLog(argument) {
                 <span>选择程序所含漏洞类型:</span>
                 <br/>
                 <br/>
-                <input type="radio" name="attack" value="demo1" >
-                <span id="demo1">缓冲区溢出(溢出点在子函数)</span>
+                <input type="radio" name="attack" value="bof" >
+                <span id="bof">缓冲区溢出</span>
                 <br/>
-                <input type="radio" name="attack" value="demo2">
-                <span id="demo2">缓冲区溢出(溢出点在主函数)</span>
                 <br/>
-                <input type="radio" name="attack" value="demo3">
-                <span id="demo3">写任意内存漏洞</span>
+                <input type="radio" name="attack" value="fsb">
+                <span id="fsb">格式化字符串</span>
+                <br/>
                 <br/>
             </td>
             <td>
                 <span>选择防御方案:</span>
                 <br/>
-                <input type="checkbox" name="defend" value="ss">
-                <span id="shadowstack">影子栈</span>
+                <input type="checkbox" name="defend" value="r2l">
+                <span id="ret2linc">返回地址检测</span>
                 <br/>
-                <input type="checkbox" name="defend" value="got">
-                <span id="gotcheck">GOT保护</span>
+                <input type="checkbox" name="defend" value="thr">
+                <span id="crbalance">gadget识别(阈值)</span>
+                <br/>
+                <input type="checkbox" name="defend" value="stk">
+                <span id="shadowstack">程序影子栈</span>
                 <br/>
                 <input type="checkbox" name="defend" value="crb">
                 <span id="crbalance">call-ret平衡</span>
                 <br/>
-                <input type="checkbox" name="defend" value="thr">
-                <span id="crbalance">阈值检测</span>
+                <input type="checkbox" name="defend" value="got">
+                <span id="gotcheck">GOT保护</span>
                 <br/>
                 <input type="checkbox" id="chElt" onclick="checkOrCancelAll();"/>
                 <span id="mySpan">select all</span>
@@ -85,19 +87,21 @@ function readLog(argument) {
     <code>
 	    <table style="background: transparent; border-color: blue" border="2" cellpadding="10">
 	    	<tr>
-	    		<th>攻击类型</th>
+	    		<th>漏洞类型</th>
+	    		<th>返回地址检测</th>
+                <th>阈值检测</th>
 	    		<th>影子栈</th>
-	    		<th>GOT保护</th>
 	    		<th>指令平衡</th>
-	    		<th>阈值检测</th>
+	    		<th>GOT保护</th>
 	    		<th>服务端口</th>
 	    	</tr>
 			<tr>
 	    		<td>{{attack}}</td>
-	    		<td>{{ss}}</td>
-	    		<td>{{got}}</td>
+	    		<td>{{r2l}}</td>
+                <td>{{thr}}</td>
+	    		<td>{{stk}}</td>
 	    		<td>{{crb}}</td>
-	    		<td>{{thr}}</td>
+	    		<td>{{got}}</td>
 	    		<td>{{port}}</td>
 	    	</tr>
 	    </table>

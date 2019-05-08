@@ -153,3 +153,16 @@ r9 - sixth argument
 
 ## B/S interface
 ![iface](./pic/bs.png)
+
+##20190507
+ret2libc poc 存在问题 非传统ret2libc
+
+## 20190508
+ - 合并demo1,2，demo按照漏洞类型重新编写: bof , fsb
+ - 方便起见，手动加入gadget于bof,fsb中，目前在elf中，todo:想办法把gadget做成共享库
+ - 讨论：理清了攻击防御展示顺序
+ - 展示界面依上，做了修改
+ - PinTools中GOT表检测，新增检测方法：若plt跳代码段，则必跳plt+1，否则跳libc函数入口。异常均为攻击。
+ - paper部分，实验部分截图啥的弄上去了，8000+
+
+![res](./pic/res.png)

@@ -66,13 +66,16 @@ function readLog(argument) {
                 <span id="crbalance">gadget识别(阈值)</span>
                 <br/>
                 <input type="checkbox" name="defend" value="stk">
-                <span id="shadowstack">程序影子栈</span>
+                <span id="shadowstack">影子栈</span>
                 <br/>
                 <input type="checkbox" name="defend" value="crb">
                 <span id="crbalance">call-ret平衡</span>
                 <br/>
                 <input type="checkbox" name="defend" value="got">
                 <span id="gotcheck">GOT保护</span>
+                <br/>
+                <input type="checkbox" name="defend" value="cpr">
+                <span id="call-preceded">先前调用返回匹配</span>
                 <br/>
                 <input type="checkbox" id="chElt" onclick="checkOrCancelAll();"/>
                 <span id="mySpan">select all</span>
@@ -92,7 +95,8 @@ function readLog(argument) {
                 <th>阈值检测</th>
 	    		<th>影子栈</th>
 	    		<th>指令平衡</th>
-	    		<th>GOT保护</th>
+                <th>GOT保护</th>
+	    		<th>先前调用返回匹配</th>
 	    		<th>服务端口</th>
 	    	</tr>
 			<tr>
@@ -101,7 +105,8 @@ function readLog(argument) {
                 <td>{{thr}}</td>
 	    		<td>{{stk}}</td>
 	    		<td>{{crb}}</td>
-	    		<td>{{got}}</td>
+                <td>{{got}}</td>
+	    		<td>{{cpr}}</td>
 	    		<td>{{port}}</td>
 	    	</tr>
 	    </table>

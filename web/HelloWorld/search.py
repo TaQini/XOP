@@ -19,6 +19,7 @@ def index(request):
         'stk':'x',
         'crb':'x',
         'got':'x',
+        'cpr':'x',
         'host':host,
         'port':0,
     }
@@ -32,11 +33,12 @@ def index(request):
         'stk':4,
         'crb':8,
         'got':16,
+        'cpr':32,
     }
     if request.POST:
         attack = request.POST.get('attack',None)
         defend = request.POST.getlist('defend',None)
-        defend_flag = ['_','_','_','_','_']
+        defend_flag = ['_','_','_','_','_','_']
         port = atbl[attack]
         for i in defend:
             port += dtbl[i]

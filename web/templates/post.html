@@ -44,7 +44,7 @@ function readLog(argument) {
         {% csrf_token %}
         <table border="0">
             <td>    
-                <span>选择程序所含漏洞类型:</span>
+                <span>选择程序所含漏洞类型:　　　　　　</span>
                 <br/>
                 <br/>
                 <input type="radio" name="attack" value="bof" >
@@ -75,7 +75,7 @@ function readLog(argument) {
                 <span id="gotcheck">GOT保护</span>
                 <br/>
                 <input type="checkbox" name="defend" value="cpr">
-                <span id="call-preceded">先前调用返回匹配</span>
+                <span id="call-preceded">CPR匹配</span>
                 <br/>
                 <input type="checkbox" id="chElt" onclick="checkOrCancelAll();"/>
                 <span id="mySpan">select all</span>
@@ -96,7 +96,7 @@ function readLog(argument) {
 	    		<th>影子栈</th>
 	    		<th>指令平衡</th>
                 <th>GOT保护</th>
-	    		<th>先前调用返回匹配</th>
+	    		<th>CPR匹配</th>
 	    		<th>服务端口</th>
 	    	</tr>
 			<tr>

@@ -11,14 +11,16 @@
 #define G_SIZE 7
 #define S_LENGTH 5
 
-#define KILL 1
+#define KILL 0
 
-// #define DEBUG 1
+#define DEBUG 1
 
-static bool STK_DECT = 0;
-static bool GOT_DECT = 0;
-static bool CRB_DECT = 0;
+static bool R2L_DECT = 0;
 static bool THR_DECT = 0;
+static bool STK_DECT = 0;
+static bool CRB_DECT = 0;
+static bool GOT_DECT = 0;
+static bool CPR_DECT = 0;
 
 static int c_count = 0;
 static int r_count = 0;
@@ -40,6 +42,7 @@ static ADDRINT execHigh;
 static LinkStack* lstack;
 static LinkStack* symbols;
 static LinkStack* symbols_libc;
+static LinkStack* cpra;
 
 /* ===================================================================== */
 INT32 Usage() {
@@ -75,20 +78,28 @@ VOID read_opt(){
 	in.getline(buf,100);
 	int flag = atoi(buf);
 	if(flag & 1){
+		R2L_DECT = 1;
+		cerr << "[+] R2L_DECT open" << endl;
+	}
+	if(flag & 2){
+		THR_DECT = 1;
+		cerr << "[+] THR_DECT open" << endl;
+	}
+	if(flag & 4){
 		STK_DECT = 1;
 		cerr << "[+] STK_DECT open" << endl;
 	}
-	if(flag & 2){
-		GOT_DECT = 1;
-		cerr << "[+] GOT_DECT open" << endl;
-	}
-	if(flag & 4){
+	if(flag & 8){
 		CRB_DECT = 1;
 		cerr << "[+] CRB_DECT open" << endl;
 	}
-	if(flag & 8){
-		THR_DECT = 1;
-		cerr << "[+] THR_DECT open" << endl;
+	if(flag & 16){
+		GOT_DECT = 1;
+		cerr << "[+] GOT_DECT open" << endl;
+	}
+	if(flag & 32){
+		CPR_DECT = 1;
+		cerr << "[+] CPR_DECT open" << endl;
 	}
 }
 
@@ -178,13 +189,21 @@ VOID logic(ADDRINT ip){
 
 // count the number of call ins
 VOID c_counter(ADDRINT ip, ADDRINT target, ADDRINT next){
-	//if ins is call and it's next address is in below range (ignore other unrelated place), count it.
-	if(next < execHigh && next > execLow){
+	if(THR_DECT){
+		if(STK_Search(symbols_libc, target) || STK_Search(symbols, target)){
+			g_counter();
+		}else{ // invaild call
+			logic(ip);
+		}
+	}
+	if( CRB_DECT && (next < execHigh && next > execLow && libcAcc && next < libcHigh && next > libcLow) ){
+		c_count++;
+	}
+	if( STK_DECT && (next < execHigh && next > execLow) ){
 		if(STK_Search(symbols, target)){
-			if(libcAcc && target < libcHigh && target > libcLow){
+			if(libcAcc && target < libcHigh && target > libcLow && libcAcc){
 				return ; // do not trace call inside of function@libc
 			}
-			c_count++;
 			if(STK_DECT){
 				STK_Push(lstack ,next);
 				// if(DEBUG) {
@@ -199,13 +218,13 @@ VOID c_counter(ADDRINT ip, ADDRINT target, ADDRINT next){
 			// }
 		}
 	}
-	if(libcAcc && next < libcHigh && next > libcLow){
-		c_count++;
+	if( CPR_DECT ){
+		STK_Push(cpra, next);
 	}
-	if(beAttacked){
-		if (STK_Search(symbols_libc, target)){
+	if( beAttacked ){
+		if ( libcAcc && STK_Search(symbols_libc, target) ){
 			string func = STK_QueryNameByAddr(symbols_libc, target);
-			cerr << "[attack] Ret2libc attack detected! call " << func;
+			cerr << "[attack] Call2libc attack detected! call " << func;
 			cerr << " addr: 0x" << std::hex << target << endl;
 			kill();
 		}else{
@@ -213,40 +232,37 @@ VOID c_counter(ADDRINT ip, ADDRINT target, ADDRINT next){
 			kill();
 		}
 	}
-	if(THR_DECT){
-		if(STK_Search(symbols_libc, target) || STK_Search(symbols, target)){
-			g_counter();
-		}else{
-			logic(ip);
-		}
-	}
 }
 
 // count the number of ret ins
 VOID r_counter(ADDRINT ip, ADDRINT target){
-	if((target < execHigh && target > execLow)){
+	if( R2L_DECT && libcAcc && STK_Search(symbols_libc, target) ){
+		beAttacked = 1;
+	}
+	if( THR_DECT ){
+		logic(ip);
+	}
+	if( CRB_DECT && (target < execHigh && target > execLow && libcAcc && target < libcHigh && target > libcLow) ){
 		r_count++;
-		if(STK_DECT){
-			ADDRINT ret = STK_Pop(lstack);
-			// if(DEBUG) {
-			// 	STK_Show(lstack);
-			// 	cerr << "Poped: 0x" << std::hex << ret << endl;
-			// }
-			if(ret != target){
-				beAttacked = 1;
-			}
+		if( r_count - c_count > 0 ){
+			beAttacked = 1;
+			cerr << "[CRB] balance break! Count of RET is " << dec << r_count-c_count << " more than CALL !"<< endl;
 		}
-		// if(DEBUG){
-			// cerr << "ret[" << std::dec << r_count  << "] to 0x" << hex << target << " @ 0x"<< std::hex << ip << endl;
-		// }
 	}
-	if(libcAcc && target < libcHigh && target > libcLow){
-		r_count++;
+	if( STK_DECT && (target < execHigh && target > execLow) ){
+		if(STK_Pop(lstack) != target){
+			beAttacked = 1;
+		}
 	}
-	if(beAttacked){
+	if( CPR_DECT ){
+		if(! STK_Search(cpra, target)){
+			beAttacked = 1;
+		}
+	}
+	if( beAttacked && libcAcc ){
 		if (STK_Search(symbols_libc, target)){
 			string func = STK_QueryNameByAddr(symbols_libc, target);
-			cerr << "[attack] Return-into-libc attack detected! call " << func;
+			cerr << "[attack] Return-into-libc attack detected! return to " << func;
 			cerr << " addr: 0x" << std::hex << target << endl;
 			kill();
 		}else{
@@ -254,44 +270,36 @@ VOID r_counter(ADDRINT ip, ADDRINT target){
 			kill();
 		}
 	}
-
-	if(THR_DECT){
-		logic(ip);
-	}
 }
 
 // count the number of branch ins
 VOID b_check(ADDRINT ip, ADDRINT target){
-	if(STK_Search(symbols, ip) && GOT_DECT && libcAcc){
-		// if(DEBUG){
-		// 	cerr << hex << "jmp @ 0x" << ip << " to 0x" << target << endl;
-		// }
+	if( GOT_DECT && STK_Search(symbols, ip) && libcAcc ){
 		// got can be modified only 1 time
 		if(target < execHigh && target > execLow){
+			if( target != ip + 6){
+				// plt[0] first jmp must be plt[1] 
+				beAttacked = 1; 
+			}
 			// cerr << "branch @ 0x" << hex << ip << " -> 0x" << next << endl;
 		}
-		else{
+		else{ // plt[0] second jmp must be libc func with same name 
 			string a = STK_QueryNameByAddr(symbols_libc, target);
 			string b = STK_QueryNameByAddr(symbols, ip);
-			// if(DEBUG) {
-			// 	cerr << "a: " << a << " | b: " << b << endl;
-			// }
 			if( b == a+"@plt"){
 				// compare symbols name 
 			}
 			else{
 				beAttacked = 1;
-				cerr << "[attack] GOT overwrite dect!!!" << endl;
+				cerr << "[GOT] GOT overwrite dect!!!" << endl;
 				kill();
 			}
 		}
 	}
-	//if ins is ret and it would return in below range of address (ignore other unrelated place), count it.
-	if(THR_DECT){
-		// logic(ip);
+	if( THR_DECT ){
 		g_counter();
 	}
-	if(beAttacked){
+	if( beAttacked ){
 		cerr << "[attack] JOP attack detected! gadget addr: 0x" << std::hex << target << endl;
 		kill();
 	}
@@ -324,10 +332,6 @@ VOID Instruction(INS ins, VOID *v) {
 	}else{
             INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)g_counter, IARG_BRANCH_TARGET_ADDR, IARG_END);		
 	}
-	if( libcAcc && CRB_DECT && r_count - c_count > 0){
-		beAttacked = 1;
-		cerr << "[CRB] balance break! Count of RET is " << dec << r_count-c_count << " more than CALL !"<< endl;
-	}
 }
 
 /* ===================================================================== */
@@ -346,9 +350,11 @@ int main(int argc, char *argv[]) {
 	lstack = new(LinkStack);
 	symbols = new(LinkStack);
 	symbols_libc = new(LinkStack);
+	cpra = new(LinkStack);
 	STK_Init(lstack);
 	STK_Init(symbols);
 	STK_Init(symbols_libc);
+	STK_Init(cpra);
 
 	PIN_InitSymbols();
 

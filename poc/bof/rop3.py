@@ -13,7 +13,6 @@ else:
     p = process('./bof')
 
 libc = ELF("../libc.so.6")
-
 printf_libc = libc.symbols['printf']
 log.info("printf@libc: " + hex(printf_libc))
 

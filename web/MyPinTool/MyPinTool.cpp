@@ -196,8 +196,13 @@ VOID c_counter(ADDRINT ip, ADDRINT target, ADDRINT next){
 			logic(ip);
 		}
 	}
-	if( CRB_DECT && (next < execHigh && next > execLow && libcAcc && next < libcHigh && next > libcLow) ){
-		c_count++;
+	if( CRB_DECT ){
+		if( next < execHigh && next > execLow ){
+			c_count++;
+		} 
+		if( libcAcc && next < libcHigh && next > libcLow ){
+			c_count++;
+		}
 	}
 	if( STK_DECT && (next < execHigh && next > execLow) ){
 		if(STK_Search(symbols, target)){
@@ -242,12 +247,13 @@ VOID r_counter(ADDRINT ip, ADDRINT target){
 	if( THR_DECT ){
 		logic(ip);
 	}
-	if( CRB_DECT && (target < execHigh && target > execLow && libcAcc && target < libcHigh && target > libcLow) ){
-		r_count++;
-		if( r_count - c_count > 0 ){
-			beAttacked = 1;
-			cerr << "[CRB] balance break! Count of RET is " << dec << r_count-c_count << " more than CALL !"<< endl;
-		}
+	if( CRB_DECT ){
+	 	if (target < execHigh && target > execLow ){
+			r_count++;
+	 	}
+	 	if (libcAcc && target < libcHigh && target > libcLow) {
+			r_count++;
+	 	}
 	}
 	if( STK_DECT && (target < execHigh && target > execLow) ){
 		if(STK_Pop(lstack) != target){
@@ -278,6 +284,7 @@ VOID b_check(ADDRINT ip, ADDRINT target){
 		// got can be modified only 1 time
 		if(target < execHigh && target > execLow){
 			if( target != ip + 6){
+				cerr << "[GOT] GOT overwrite dect!!!" << endl;
 				// plt[0] first jmp must be plt[1] 
 				beAttacked = 1; 
 			}
@@ -331,6 +338,10 @@ VOID Instruction(INS ins, VOID *v) {
 			IARG_END);
 	}else{
             INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)g_counter, IARG_BRANCH_TARGET_ADDR, IARG_END);		
+	}
+	if( r_count > c_count ){
+		beAttacked = 1;
+		cerr << "[CRB] balance break! Count of RET is " << dec << r_count-c_count << " more than CALL !"<< endl;
 	}
 }
 

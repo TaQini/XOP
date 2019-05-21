@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>ROP攻击防御检测效果展示</title>
+<title>ROP攻击检测系统 - 测试平台</title>
 <script type="text/javascript">
 function checkOrCancelAll() {
     var chElt=document.getElementById("chElt");
@@ -36,7 +36,7 @@ function readLog(argument) {
 
 </script>
 <h1>
-    ROP攻击防御检测效果展示
+    ROP攻击检测系统 - 测试平台
 </h1>
 </head>
 <body>
@@ -57,25 +57,25 @@ function readLog(argument) {
                 <br/>
             </td>
             <td>
-                <span>选择防御方案:</span>
+                <span>选择检测方案:</span>
                 <br/>
                 <input type="checkbox" name="defend" value="r2l">
-                <span id="ret2linc">返回地址检测</span>
+                <span id="ret2linc">Return-into-libc检测</span>
                 <br/>
                 <input type="checkbox" name="defend" value="thr">
-                <span id="crbalance">gadget识别(阈值)</span>
+                <span id="crbalance">阈值检测器</span>
                 <br/>
                 <input type="checkbox" name="defend" value="stk">
                 <span id="shadowstack">影子栈</span>
                 <br/>
                 <input type="checkbox" name="defend" value="crb">
-                <span id="crbalance">call-ret平衡</span>
+                <span id="crbalance">调用/返回指令计数器</span>
                 <br/>
                 <input type="checkbox" name="defend" value="got">
-                <span id="gotcheck">GOT保护</span>
+                <span id="gotcheck">GOT表篡改检测</span>
                 <br/>
                 <input type="checkbox" name="defend" value="cpr">
-                <span id="call-preceded">CPR匹配</span>
+                <span id="call-preceded">CPR检测器</span>
                 <br/>
                 <input type="checkbox" id="chElt" onclick="checkOrCancelAll();"/>
                 <span id="mySpan">select all</span>
@@ -90,13 +90,13 @@ function readLog(argument) {
     <code>
 	    <table style="background: transparent; border-color: blue" border="2" cellpadding="10">
 	    	<tr>
-	    		<th>漏洞类型</th>
-	    		<th>返回地址检测</th>
+	    		<th>应用程序</th>
+	    		<th>ret2libc检测</th>
                 <th>阈值检测</th>
 	    		<th>影子栈</th>
-	    		<th>指令平衡</th>
-                <th>GOT保护</th>
-	    		<th>CPR匹配</th>
+	    		<th>指令计数器</th>
+                <th>GOT表检测</th>
+	    		<th>CPR检测</th>
 	    		<th>服务端口</th>
 	    	</tr>
 			<tr>

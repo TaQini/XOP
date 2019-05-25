@@ -362,8 +362,8 @@ int main(int argc, char *argv[]) {
 	symbols = new(LinkStack);
 	symbols_libc = new(LinkStack);
 	cpra = new(LinkStack);
-	STK_Init(lstack);
-	STK_Init(symbols);
+	STK_Init(lstack);		
+	STK_Init(symbols);		
 	STK_Init(symbols_libc);
 	STK_Init(cpra);
 

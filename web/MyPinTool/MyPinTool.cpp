@@ -400,21 +400,3 @@ int main(int argc, char *argv[]) {
 /* ===================================================================== */
 /* eof */
 /* ===================================================================== */
-
-// pin rop fram
-// - ins dect pos 
-// - method 
-// 1.addr cmp 
-// 2.ins count 
-// 3.gadget length ?
-// 4.got protect
-
-// handel
-// ROP JOP return-into-libc
-
-// shadowstack cannot handle jop
-// what to do when pin has vulnerability? protect got
-
-// trace point set? 
-// some func(e.g. printf) in libc do not obey call-ret balance 
-// it still difficult to deal with by shadow stack... because of setjmp etc
